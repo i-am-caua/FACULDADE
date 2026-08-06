@@ -15,7 +15,7 @@
 ## Estrutura de pastas
 
 ```
-04-Banco-de-Dados-II/
+03-Banco-de-Dados-II/
 ├── AGENTS.md
 ├── 00-Plano-de-Ensino/    ← ementa oficial, cronograma (atualizar quando chegar)
 ├── 01-Anotacoes/          ← 2026-08-06-assunto.md

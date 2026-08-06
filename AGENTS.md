@@ -14,13 +14,12 @@ faculdade e a casa do estudante.
 | Pasta | Disciplina | Professor |
 |---|---|---|
 | `01-Atividade-de-Extensao-I` | Atividade de Extensão I | Cleon Xavier Pereira Junior |
-| `02-Atividade-Complementar` | Atividade Complementar (.0003) | — |
-| `03-AED-IV` | Algoritmos e Estruturas de Dados IV | Thamer Horbylon Nascimento |
-| `04-Banco-de-Dados-II` | Banco de Dados II | Wesley Flavio de Miranda |
-| `05-Computacao-Movel` | Computação Móvel | Thamer Horbylon Nascimento |
-| `06-Pesquisa-Operacional` | Pesquisa Operacional | Lais Candido Rodrigues da Silva Lopes |
-| `07-Redes-de-Computadores` | Redes de Computadores | Wesley Flavio de Miranda |
-| `08-Teoria-dos-Grafos` | Teoria dos Grafos | Newarney Torrezao da Costa |
+| `02-AED-IV` | Algoritmos e Estruturas de Dados IV | Thamer Horbylon Nascimento |
+| `03-Banco-de-Dados-II` | Banco de Dados II | Wesley Flavio de Miranda |
+| `04-Computacao-Movel` | Computação Móvel | Thamer Horbylon Nascimento |
+| `05-Pesquisa-Operacional` | Pesquisa Operacional | Lais Candido Rodrigues da Silva Lopes |
+| `06-Redes-de-Computadores` | Redes de Computadores | Wesley Flavio de Miranda |
+| `07-Teoria-dos-Grafos` | Teoria dos Grafos | Newarney Torrezao da Costa |
 
 ## Estrutura padrão de uma disciplina
 
@@ -37,8 +36,8 @@ NN-Disciplina/
 └── 05-Materiais/          ← slides, PDFs, livros, links úteis
 ```
 
-Disciplinas de Atividade (Extensão/Complementar) usam `02-Entregas` e `03-Comprovantes`.
-A disciplina AED IV possui estrutura expandida — ver `03-AED-IV/AGENTS.md`.
+Disciplinas de Atividade (Extensão) usam `02-Entregas` e `03-Comprovantes`.
+A disciplina AED IV possui estrutura expandida — ver `02-AED-IV/AGENTS.md`.
 
 ## Convenções obrigatórias (pt-BR)
 

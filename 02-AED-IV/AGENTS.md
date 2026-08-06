@@ -15,7 +15,7 @@
 ## Estrutura de pastas (expandida)
 
 ```
-03-AED-IV/
+02-AED-IV/
 ├── AGENTS.md
 ├── 00-Plano-de-Ensino/    ← ementa oficial, cronograma (PRIORIDADE nº 1 quando chegar)
 ├── 01-Anotacoes/          ← resumo por aula: 2026-08-06-assunto.md

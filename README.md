@@ -14,13 +14,12 @@ exercícios, projetos e avaliações, tudo em um só lugar.
 | Pasta | Disciplina | Professor |
 |---|---|---|
 | `01-Atividade-de-Extensao-I` | Atividade de Extensão I | Cleon Xavier Pereira Junior |
-| `02-Atividade-Complementar` | Atividade Complementar (.0003) | — |
-| `03-AED-IV` | Algoritmos e Estruturas de Dados IV | Thamer Horbylon Nascimento |
-| `04-Banco-de-Dados-II` | Banco de Dados II | Wesley Flavio de Miranda |
-| `05-Computacao-Movel` | Computação Móvel | Thamer Horbylon Nascimento |
-| `06-Pesquisa-Operacional` | Pesquisa Operacional | Lais Candido Rodrigues da Silva Lopes |
-| `07-Redes-de-Computadores` | Redes de Computadores | Wesley Flavio de Miranda |
-| `08-Teoria-dos-Grafos` | Teoria dos Grafos | Newarney Torrezao da Costa |
+| `02-AED-IV` | Algoritmos e Estruturas de Dados IV | Thamer Horbylon Nascimento |
+| `03-Banco-de-Dados-II` | Banco de Dados II | Wesley Flavio de Miranda |
+| `04-Computacao-Movel` | Computação Móvel | Thamer Horbylon Nascimento |
+| `05-Pesquisa-Operacional` | Pesquisa Operacional | Lais Candido Rodrigues da Silva Lopes |
+| `06-Redes-de-Computadores` | Redes de Computadores | Wesley Flavio de Miranda |
+| `07-Teoria-dos-Grafos` | Teoria dos Grafos | Newarney Torrezao da Costa |
 
 ---
 
@@ -31,13 +30,12 @@ FACULDADE/
 ├── AGENTS.md                          ← guia para o agente de IA (contexto global)
 ├── README.md                          ← este arquivo
 ├── 01-Atividade-de-Extensao-I/        ← pastas numeradas = disciplinas
-├── 02-Atividade-Complementar/
-├── 03-AED-IV/                         ← estrutura expandida (ver abaixo)
-├── 04-Banco-de-Dados-II/
-├── 05-Computacao-Movel/
-├── 06-Pesquisa-Operacional/
-├── 07-Redes-de-Computadores/
-└── 08-Teoria-dos-Grafos/
+├── 02-AED-IV/                         ← estrutura expandida (ver abaixo)
+├── 03-Banco-de-Dados-II/
+├── 04-Computacao-Movel/
+├── 05-Pesquisa-Operacional/
+├── 06-Redes-de-Computadores/
+└── 07-Teoria-dos-Grafos/
 ```
 
 ### Estrutura padrão de cada disciplina
@@ -55,7 +53,7 @@ NN-Disciplina/
 
 ### Disciplinas de atividade
 
-Extensão e Complementar seguem estrutura própria:
+Extensão segue estrutura própria:
 
 ```
 NN-Atividade/
@@ -69,7 +67,7 @@ NN-Atividade/
 ### AED IV (estrutura expandida)
 
 ```
-03-AED-IV/
+02-AED-IV/
 ├── AGENTS.md
 ├── 00-Plano-de-Ensino/
 ├── 01-Anotacoes/                  ← resumo por aula
@@ -156,5 +154,5 @@ pelo professor (arquivado em `00-Plano-de-Ensino/`).
 
 - [ ] Baixar e arquivar o plano de ensino de cada disciplina em `00-Plano-de-Ensino/`
 - [ ] Confirmar linguagem/ferramentas de cada disciplina (C, SQL, Flutter, etc.)
-- [ ] Preencher o controle de horas da Atividade Complementar
+- [ ] Preencher o controle de horas da Atividade de Extensão
 - [ ] Adicionar `.gitignore` específicos por projeto (builds, SDKs, etc.)

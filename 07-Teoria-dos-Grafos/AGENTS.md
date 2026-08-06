@@ -15,7 +15,7 @@
 ## Estrutura de pastas
 
 ```
-08-Teoria-dos-Grafos/
+07-Teoria-dos-Grafos/
 ├── AGENTS.md
 ├── 00-Plano-de-Ensino/    ← ementa oficial, cronograma (atualizar quando chegar)
 ├── 01-Anotacoes/          ← 2026-08-06-assunto.md
