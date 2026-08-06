@@ -1,0 +1,26 @@
+# Compilados e artefatos de build
+*.o
+*.obj
+*.exe
+*.class
+*.jar
+target/
+build/
+dist/
+node_modules/
+
+# Ferramentas/IDEs
+.idea/
+.vscode/
+*.suo
+*.user
+Thumbs.db
+.DS_Store
+
+# Configuração local
+.env
+credentials.json
+
+# Anotações temporárias
+~$*
+*.tmp
