@@ -33,8 +33,19 @@
 │   └── grafos/
 ├── 04-Projetos/           ← trabalhos práticos valendo nota
 ├── 05-Avaliacoes/         ← provas e trabalhos, organizados por data
-└── 06-Materiais/          ← slides, PDFs, livros, links
+└── 06-Materiais/          ← slides e PDFs por tópico (aulas numeradas):
+    ├── 01-arvores-balanceadas/
+    ├── 02-arvores-b/
+    ├── 03-heaps-e-filas-de-prioridade/
+    ├── 04-tabelas-hash/
+    ├── 05-grafos-representacoes/
+    ├── 06-ordenacao-e-complexidade/
+    ├── 07-busca-em-grafos/
+    └── 08-complexidade-amortizada/
 ```
+
+> Slides: nomear como `aula-NN-MM-assunto.pdf` dentro da pasta do tópico
+> (ex.: `aula-01-02-arvores-balanceadas-avl.pdf`).
 
 ## Tópicos prováveis (ESTIMATIVA — atualizar com o plano de ensino)
 
