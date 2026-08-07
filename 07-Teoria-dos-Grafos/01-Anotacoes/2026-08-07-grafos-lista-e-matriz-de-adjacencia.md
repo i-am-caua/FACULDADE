@@ -13,6 +13,17 @@
 ### 1.1. Grafos Não Orientados
 - **Características:** São grafos cujas conexões possuem "ida e volta" (são bidirecionais).
 
+#### Desenho do Grafo:
+
+```mermaid
+graph LR
+    1 --- 2
+    1 --- 4
+    2 --- 3
+    2 --- 4
+    3 --- 4
+```
+
 #### Exemplo:
 - **Vértices:** $1, 2, 3, 4$
 
@@ -27,6 +38,15 @@
 
 ### 1.2. Grafos Orientados
 - **Características:** São grafos cujas conexões possuem "via única" (orientação definida por setas).
+
+#### Desenho do Grafo:
+
+```mermaid
+graph LR
+    2 --> 1
+    3 --> 2
+    3 --> 1
+```
 
 #### Exemplo:
 - **Vértices:** $1, 2, 3$
@@ -47,7 +67,18 @@
 ### 2.1. Grafo Não Orientado
 
 #### Exemplo (`exp`):
-- Grafo não orientado com 3 vértices ($1, 2, 3$) totalmente conectados entre si.
+- Grafo não orientado com 3 vértices ($1, 2, 3$) totalmente conectados entre si (triângulo $K_3$).
+
+#### Desenho do Grafo:
+
+```mermaid
+graph LR
+    1 --- 2
+    1 --- 3
+    2 --- 3
+```
+
+**Matriz de Adjacência:**
 
 $$
 \begin{pmatrix}
@@ -70,6 +101,17 @@ $$
 
 #### Exemplo:
 - Grafo orientado com 3 vértices ($1, 2, 3$), onde $1 \to 2$, $1 \to 3$ e $2 \to 3$.
+
+#### Desenho do Grafo:
+
+```mermaid
+graph LR
+    1 --> 2
+    1 --> 3
+    2 --> 3
+```
+
+**Matriz de Adjacência:**
 
 $$
 \begin{pmatrix}
