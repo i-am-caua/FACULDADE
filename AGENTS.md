@@ -39,6 +39,46 @@ NN-Disciplina/
 Disciplinas de Atividade (Extensão) usam `02-Entregas` e `03-Comprovantes`.
 A disciplina AED IV possui estrutura expandida — ver `02-AED-IV/AGENTS.md`.
 
+## Organização de atividades, listas e enunciados
+
+Para atividades com várias questões ou vários arquivos, usar uma pasta própria
+dentro do tópico correspondente:
+
+```
+02-Exercicios/<topico>/NN-lista-<assunto>/
+├── README.md                  ← índice e estado das soluções
+├── 00-enunciado/             ← fonte oficial da atividade
+│   ├── nome-da-atividade.pdf ← arquivo original, quando disponível
+│   └── nome-da-atividade.md  ← transcrição fiel para leitura por IA
+├── 01-<questao-ou-tema>/
+│   ├── README.md             ← como compilar, executar e testar
+│   ├── questao-01.c
+│   └── apoio/                ← visualizações e materiais que não são entrega
+└── 02-<questao-ou-tema>/
+    ├── README.md
+    └── questao-02.c
+```
+
+Regras para essa estrutura:
+
+1. Quando o professor disponibilizar uma atividade ou lista em PDF, **manter o
+   PDF original** e criar, sempre que viável, uma versão `.md` fiel para
+   facilitar busca, leitura e uso por agentes de IA.
+2. O PDF e sua transcrição Markdown ficam juntos em `00-enunciado/`. A versão
+   Markdown deve identificar a origem: Moodle (AVA), disciplina e professor.
+3. Nunca substituir o enunciado oficial por um `README.md`. O `README.md` é
+   apenas um índice da pasta e um guia para compilar, executar e testar.
+4. Separar soluções em subpastas numeradas por questão ou tema quando a
+   atividade possuir vários entregáveis.
+5. Colocar visualizações HTML, diagramas, rascunhos e outros materiais
+   didáticos em `apoio/`; eles não fazem parte da entrega, salvo instrução do
+   professor.
+6. Anotações de aula continuam em `01-Anotacoes/`, e slides ou materiais gerais
+   continuam em `05-Materiais/` (ou na pasta equivalente da disciplina).
+7. Para exercícios pequenos de arquivo único, a estrutura pode ser simplificada,
+   mas a separação entre **enunciado oficial**, **solução** e **apoio** deve ser
+   preservada.
+
 ## Convenções obrigatórias (pt-BR)
 
 1. **Idioma:** todo conteúdo (anotações, nomes de arquivo, READMEs, código,
@@ -76,7 +116,8 @@ A disciplina AED IV possui estrutura expandida — ver `02-AED-IV/AGENTS.md`.
 3. Ao criar projeto: criar subpasta com nome kebab-case em `03-Projetos/` e
    incluir `README.md` com instruções de execução.
 4. Ao ajudar com exercícios: resolver na pasta `02-Exercicios/` seguindo o
-   assunto, com arquivo de solução e explicação breve em pt-BR.
+   assunto e a estrutura de atividades definida acima, com arquivo de solução e
+   explicação breve em pt-BR.
 5. Tópicos de disciplina são **estimativas** até o plano de ensino chegar —
    marcar no AGENTS.md da disciplina o que já foi confirmado vs. estimado.
 6. Se o usuário citar o Moodle/professor, preferir o conteúdo do plano de

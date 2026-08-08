@@ -21,6 +21,10 @@
 ├── 01-Anotacoes/          ← resumo por aula: 2026-08-06-assunto.md
 ├── 02-Exercicios/         ← listas resolvidas, organizadas por tópico:
 │   ├── arvores/
+│   │   └── NN-lista-<assunto>/
+│   │       ├── 00-enunciado/
+│   │       ├── 01-<questao-ou-tema>/
+│   │       └── 02-<questao-ou-tema>/
 │   ├── heap/
 │   ├── hash/
 │   └── grafos/
@@ -74,9 +78,17 @@
 1. Priorizar **código comentado em pt-BR** com nomes de variáveis claros.
 2. Para cada implementação nova: criar a subpasta kebab-case em
    `03-Implementacoes/` + `README.md` (como compilar/rodar/testar).
-3. Exercícios de lista: criar arquivo em `02-Exercicios/<topico>/` seguindo o
-   nome da questão (ex.: `questao-01.c` + `README.md` com enunciado resumido).
-4. Provas: salvar em `05-Avaliacoes/YYYY-MM-DD-<tipo>.md` (ex.: `2026-10-15-prova-2.md`).
-5. Se o professor usar plataforma específica de juiz/entrega (ex.: Moodle,
+3. Exercícios de lista com várias questões: criar
+   `02-Exercicios/<topico>/NN-lista-<assunto>/`, guardar o material oficial em
+   `00-enunciado/` e separar as soluções em subpastas numeradas por questão ou
+   tema.
+4. Quando a lista vier em PDF, preservar o arquivo original e manter ao lado uma
+   transcrição `.md` fiel e identificada como material do Moodle (AVA) da
+   disciplina.
+5. Cada pasta com código deve possuir `README.md` com comandos exatos para
+   compilar, executar e testar. Visualizações e materiais auxiliares ficam em
+   `apoio/` e não são considerados parte da entrega.
+6. Provas: salvar em `05-Avaliacoes/YYYY-MM-DD-<tipo>.md` (ex.: `2026-10-15-prova-2.md`).
+7. Se o professor usar plataforma específica de juiz/entrega (ex.: Moodle,
    RunCodes, URI/Beecrowd), anotar aqui qual é — marca a fonte oficial de
    exercícios.
