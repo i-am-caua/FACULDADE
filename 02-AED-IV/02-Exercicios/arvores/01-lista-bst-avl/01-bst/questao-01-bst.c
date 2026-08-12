@@ -46,7 +46,7 @@ char *encontrarNo (No *raiz, int chave) {
 }
 
 No  *menor (No *raiz) {
-    if (raiz == NULL) return NULL; //arv vazia
+    if (raiz == NULL) return NULL;
 
     No *aux = raiz;
 
@@ -57,7 +57,7 @@ No  *menor (No *raiz) {
 
 }
 int maior (No *raiz) {
-    if (raiz == NULL) return -1; //arv vazia
+    if (raiz == NULL) return -1;
 
     No *aux = raiz;
 
