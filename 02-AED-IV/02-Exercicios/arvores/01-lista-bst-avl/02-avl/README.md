@@ -14,6 +14,10 @@ Moodle (AVA) da disciplina **Algoritmos e Estruturas de Dados IV**.
 ## Arquivos
 
 - `questao-02-avl.c`: implementacao da arvore AVL com chave e nome em cada no.
+- `apoio/visualizacao-rotacoes-avl.html`: visualizacao interativa das rotacoes
+  direita e esquerda (arvore com ponteiros `raiz`/`aux` a esquerda e valores
+  das variaveis a direita). Abrir com duplo clique no navegador. Nao faz parte
+  da entrega.
 
 ## Funcionalidades
 
