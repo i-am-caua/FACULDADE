@@ -273,7 +273,7 @@ var ROTACOES = {
       '    return aux;',
       '}'
     ],
-    comentarios: ['entrada da função', 'aux recebe o filho direito', 'neto B(25) sobe para a vaga de filho direito', 'raiz desce e vira filho esquerdo de aux', 'recalcula a altura de raiz (X)', 'recalcula a altura de aux (Y)', 'devolve o novo topo da subárvore', ''],
+    comentarios: ['entrada da função', 'aux recebe o filho direito', 'neto B(40) sobe para a vaga de filho direito', 'raiz desce e vira filho esquerdo de aux', 'recalcula a altura de raiz (X)', 'recalcula a altura de aux (Y)', 'devolve o novo topo da subárvore', ''],
     passos: [
       {
         descricao: 'Estado inicial: a função recebe o nó desequilibrado X(30) como raiz. A letra identifica cada nó; entre parênteses está a chave.',
@@ -282,7 +282,7 @@ var ROTACOES = {
           { id: 'X', rot: 'X', chave: 30, x: 280, y: 70,  esq: 'A', dir: 'Y', alt: 3 },
           { id: 'A', rot: 'A', chave: 10, x: 140, y: 210, alt: 1 },
           { id: 'Y', rot: 'Y', chave: 50, x: 420, y: 210, esq: 'B', dir: 'Z', alt: 2 },
-          { id: 'B', rot: 'B', chave: 25, x: 310, y: 350, alt: 1 },
+          { id: 'B', rot: 'B', chave: 40, x: 310, y: 350, alt: 1 },
           { id: 'Z', rot: 'Z', chave: 60, x: 470, y: 350, alt: 1 }
         ],
         vars: [['X (30)', false], ['— (ainda não criado)', false], ['A (10)', false], ['Y (50)', false], ['—', false], ['—', false], ['3', false], ['2', false], ['—', false]]
@@ -294,22 +294,22 @@ var ROTACOES = {
           { id: 'X', rot: 'X', chave: 30, x: 280, y: 70,  esq: 'A', dir: 'Y', alt: 3 },
           { id: 'A', rot: 'A', chave: 10, x: 140, y: 210, alt: 1 },
           { id: 'Y', rot: 'Y', chave: 50, x: 420, y: 210, esq: 'B', dir: 'Z', alt: 2 },
-          { id: 'B', rot: 'B', chave: 25, x: 310, y: 350, alt: 1 },
+          { id: 'B', rot: 'B', chave: 40, x: 310, y: 350, alt: 1 },
           { id: 'Z', rot: 'Z', chave: 60, x: 470, y: 350, alt: 1 }
         ],
-        vars: [['X (30)', false], ['Y (50)', true], ['A (10)', false], ['Y (50)', false], ['B (25)', false], ['Z (60)', false], ['3', false], ['2', false], ['—', false]]
+        vars: [['X (30)', false], ['Y (50)', true], ['A (10)', false], ['Y (50)', false], ['B (40)', false], ['Z (60)', false], ['3', false], ['2', false], ['—', false]]
       },
       {
-        descricao: 'raiz->dir = aux->esq  →  o neto B(25) sobe e ocupa a vaga de filho direito de X. O campo aux->esq ainda guarda B(25); a linha tracejada mostra esse valor que será sobrescrito no próximo passo.',
+        descricao: 'raiz->dir = aux->esq  →  o neto B(40) sobe e ocupa a vaga de filho direito de X. O campo aux->esq ainda guarda B(40); a linha tracejada mostra esse valor que será sobrescrito no próximo passo.',
         linha: 2, raiz: 'X', aux: 'Y', novas: ['X>dir'], removidas: [{ from: 'Y', to: 'B', campo: 'esq' }],
         nos: [
           { id: 'X', rot: 'X', chave: 30, x: 280, y: 70,  esq: 'A', dir: 'B', alt: 3 },
           { id: 'A', rot: 'A', chave: 10, x: 140, y: 210, alt: 1 },
           { id: 'Y', rot: 'Y', chave: 50, x: 420, y: 210, dir: 'Z', alt: 2 },
-          { id: 'B', rot: 'B', chave: 25, x: 310, y: 350, alt: 1 },
+          { id: 'B', rot: 'B', chave: 40, x: 310, y: 350, alt: 1 },
           { id: 'Z', rot: 'Z', chave: 60, x: 470, y: 350, alt: 1 }
         ],
-        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (25)', true], ['B (25)', false], ['Z (60)', false], ['3', false], ['2', false], ['—', false]]
+        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (40)', true], ['B (40)', false], ['Z (60)', false], ['3', false], ['2', false], ['—', false]]
       },
       {
         descricao: 'aux->esq = raiz  →  X(30) desce e vira o filho esquerdo de Y(50). Y(50) passa a ocupar o topo da subárvore.',
@@ -319,9 +319,9 @@ var ROTACOES = {
           { id: 'X', rot: 'X', chave: 30, x: 120, y: 210, esq: 'A', dir: 'B', alt: 3 },
           { id: 'Z', rot: 'Z', chave: 60, x: 370, y: 210, alt: 1 },
           { id: 'A', rot: 'A', chave: 10, x: 45,  y: 350, alt: 1 },
-          { id: 'B', rot: 'B', chave: 25, x: 195, y: 350, alt: 1 }
+          { id: 'B', rot: 'B', chave: 40, x: 195, y: 350, alt: 1 }
         ],
-        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (25)', false], ['X (30)', true], ['Z (60)', false], ['3', false], ['2', false], ['—', false]]
+        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (40)', false], ['X (30)', true], ['Z (60)', false], ['3', false], ['2', false], ['—', false]]
       },
       {
         descricao: 'atualizarAltura(raiz)  →  altura de X(30) recalculada: 1 + max(altura(A), altura(B)) = 2.',
@@ -331,9 +331,9 @@ var ROTACOES = {
           { id: 'X', rot: 'X', chave: 30, x: 120, y: 210, esq: 'A', dir: 'B', alt: 2 },
           { id: 'Z', rot: 'Z', chave: 60, x: 370, y: 210, alt: 1 },
           { id: 'A', rot: 'A', chave: 10, x: 45,  y: 350, alt: 1 },
-          { id: 'B', rot: 'B', chave: 25, x: 195, y: 350, alt: 1 }
+          { id: 'B', rot: 'B', chave: 40, x: 195, y: 350, alt: 1 }
         ],
-        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (25)', false], ['X (30)', false], ['Z (60)', false], ['2', true], ['2', false], ['—', false]]
+        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (40)', false], ['X (30)', false], ['Z (60)', false], ['2', true], ['2', false], ['—', false]]
       },
       {
         descricao: 'atualizarAltura(aux)  →  altura de Y(50) recalculada: 1 + max(altura(X), altura(Z)) = 3. Subárvore balanceada.',
@@ -343,9 +343,9 @@ var ROTACOES = {
           { id: 'X', rot: 'X', chave: 30, x: 120, y: 210, esq: 'A', dir: 'B', alt: 2 },
           { id: 'Z', rot: 'Z', chave: 60, x: 370, y: 210, alt: 1 },
           { id: 'A', rot: 'A', chave: 10, x: 45,  y: 350, alt: 1 },
-          { id: 'B', rot: 'B', chave: 25, x: 195, y: 350, alt: 1 }
+          { id: 'B', rot: 'B', chave: 40, x: 195, y: 350, alt: 1 }
         ],
-        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (25)', false], ['X (30)', false], ['Z (60)', false], ['2', false], ['3', true], ['—', false]]
+        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (40)', false], ['X (30)', false], ['Z (60)', false], ['2', false], ['3', true], ['—', false]]
       },
       {
         descricao: 'return aux  →  a função devolve Y(50): a nova raiz da subárvore balanceada.',
@@ -355,9 +355,9 @@ var ROTACOES = {
           { id: 'X', rot: 'X', chave: 30, x: 120, y: 210, esq: 'A', dir: 'B', alt: 2 },
           { id: 'Z', rot: 'Z', chave: 60, x: 370, y: 210, alt: 1 },
           { id: 'A', rot: 'A', chave: 10, x: 45,  y: 350, alt: 1 },
-          { id: 'B', rot: 'B', chave: 25, x: 195, y: 350, alt: 1 }
+          { id: 'B', rot: 'B', chave: 40, x: 195, y: 350, alt: 1 }
         ],
-        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (25)', false], ['X (30)', false], ['Z (60)', false], ['2', false], ['3', false], ['Y (50) → nova raiz', true]]
+        vars: [['X (30)', false], ['Y (50)', false], ['A (10)', false], ['B (40)', false], ['X (30)', false], ['Z (60)', false], ['2', false], ['3', false], ['Y (50) → nova raiz', true]]
       }
     ]
   }
