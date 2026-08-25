@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador Visual do Algoritmo de Floyd — Passo a Passo</title>
+  <style>
+    :root {
+      --bg-color: #0b1120;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --color-k: #f59e0b;     /* Âmbar / Dourado para o Intermediário k */
+      --color-i: #38bdf8;     /* Ciano para a Origem i */
+      --color-j: #a855f7;     /* Roxo para o Destino j */
+      --color-updated: #22c55e; /* Verde para sucesso / atualização */
+      --color-neutral: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .header-title h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-title p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .legend-badges {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-k {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: var(--color-k);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .badge-i {
+      background-color: rgba(56, 189, 248, 0.15);
+      color: var(--color-i);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .badge-j {
+      background-color: rgba(168, 85, 247, 0.15);
+      color: var(--color-j);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+
+    /* Layout principal */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      gap: 1.25rem;
+      padding: 1.25rem 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Painel do Grafo e Controles */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Barra de Controle de Execução */
+    .control-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      background-color: #1e293b;
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    button.btn {
+      background-color: #334155;
+      color: #fff;
+      border: 1px solid #475569;
+      padding: 0.45rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+
+    button.btn:hover:not(:disabled) {
+      background-color: #475569;
+      border-color: var(--color-i);
+    }
+
+    button.btn-primary {
+      background-color: #0284c7;
+      border-color: #0369a1;
+    }
+
+    button.btn-primary:hover:not(:disabled) {
+      background-color: #0369a1;
+    }
+
+    button.btn-success {
+      background-color: #15803d;
+      border-color: #166534;
+    }
+
+    button.btn-success:hover:not(:disabled) {
+      background-color: #166534;
+    }
+
+    button.btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .speed-control input[type="range"] {
+      width: 90px;
+      accent-color: var(--color-i);
+      cursor: pointer;
+    }
+
+    /* Container SVG do Grafo */
+    .graph-container {
+      position: relative;
+      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #graph-svg {
+      width: 100%;
+      height: 440px;
+      user-select: none;
+    }
+
+    /* Elementos SVG */
+    .edge-base {
+      stroke: #334155;
+      stroke-width: 2.5;
+    }
+
+    .edge-flow-ik {
+      stroke: var(--color-i);
+      stroke-width: 4;
+      stroke-dasharray: 6 4;
+      animation: dash 1s linear infinite;
+    }
+
+    .edge-flow-kj {
+      stroke: var(--color-j);
+      stroke-width: 4;
+      stroke-dasharray: 6 4;
+      animation: dash 1s linear infinite;
+    }
+
+    .edge-direct-ij {
+      stroke: #64748b;
+      stroke-width: 2;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -20;
+      }
+    }
+
+    .edge-label-bg {
+      fill: #0b1120;
+      stroke: #334155;
+      stroke-width: 1;
+      rx: 5;
+      ry: 5;
+    }
+
+    .edge-label-text {
+      fill: #cbd5e1;
+      font-size: 10px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .node-group {
+      transition: transform 0.2s;
+    }
+
+    .node-circle {
+      fill: #1e293b;
+      stroke: #475569;
+      stroke-width: 3;
+      transition: all 0.3s;
+    }
+
+    /* Cores dos Nós no Laço */
+    .node-circle.node-k {
+      fill: #78350f;
+      stroke: var(--color-k);
+      stroke-width: 5;
+      filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.8));
+    }
+
+    .node-circle.node-i {
+      fill: #075985;
+      stroke: var(--color-i);
+      stroke-width: 5;
+      filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.8));
+    }
+
+    .node-circle.node-j {
+      fill: #581c87;
+      stroke: var(--color-j);
+      stroke-width: 5;
+      filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.8));
+    }
+
+    .node-circle.node-same {
+      fill: #3b0764;
+      stroke: #ec4899;
+      stroke-width: 5;
+    }
+
+    .node-abbr {
+      fill: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .node-title {
+      fill: #f1f5f9;
+      font-size: 12px;
+      font-weight: 600;
+      text-anchor: middle;
+    }
+
+    .node-role-badge {
+      font-size: 10px;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    /* Painel da Fórmula e Comparação */
+    .formula-card {
+      background: #111827;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0.9rem 1.2rem;
+    }
+
+    .formula-header {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+
+    .formula-expression {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.95rem;
+      background: #030712;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .term-ik { color: var(--color-i); font-weight: 700; }
+    .term-kj { color: var(--color-j); font-weight: 700; }
+    .term-k  { color: var(--color-k); font-weight: 700; }
+    .term-ij { color: #f8fafc; font-weight: 700; }
+
+    .formula-result-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    .res-updated {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .res-no-change {
+      background: rgba(100, 116, 139, 0.2);
+      color: #94a3b8;
+      border: 1px solid rgba(100, 116, 139, 0.3);
+    }
+
+    /* Painel Direito: Matriz e Log */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    .matrix-table th, .matrix-table td {
+      padding: 0.45rem 0.25rem;
+      border: 1px solid #334155;
+      transition: all 0.2s;
+    }
+
+    .matrix-table th {
+      background-color: #0f172a;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    .matrix-table th.th-i {
+      background-color: rgba(56, 189, 248, 0.25);
+      color: var(--color-i);
+    }
+
+    .matrix-table th.th-j {
+      background-color: rgba(168, 85, 247, 0.25);
+      color: var(--color-j);
+    }
+
+    .matrix-table th.th-k {
+      background-color: rgba(245, 158, 11, 0.25);
+      color: var(--color-k);
+    }
+
+    .matrix-table td {
+      background-color: rgba(30, 41, 59, 0.5);
+      font-family: 'Consolas', monospace;
+    }
+
+    .matrix-table td.row-i {
+      background-color: rgba(56, 189, 248, 0.08);
+    }
+
+    .matrix-table td.col-j {
+      background-color: rgba(168, 85, 247, 0.08);
+    }
+
+    /* Células em foco */
+    .matrix-table td.cell-ij {
+      background-color: rgba(236, 72, 153, 0.3) !important;
+      border: 2px solid #f43f5e;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .matrix-table td.cell-ik {
+      background-color: rgba(56, 189, 248, 0.25) !important;
+      border: 1px dashed var(--color-i);
+      color: var(--color-i);
+      font-weight: 700;
+    }
+
+    .matrix-table td.cell-kj {
+      background-color: rgba(245, 158, 11, 0.25) !important;
+      border: 1px dashed var(--color-k);
+      color: var(--color-k);
+      font-weight: 700;
+    }
+
+    .matrix-table td.just-updated {
+      animation: pulse-green 1s ease;
+      background-color: rgba(34, 197, 94, 0.4) !important;
+      color: #4ade80 !important;
+      font-weight: 800;
+    }
+
+    @keyframes pulse-green {
+      0% { transform: scale(1.15); background-color: #22c55e; }
+      100% { transform: scale(1); }
+    }
+
+    .matrix-table td.inf-val {
+      color: #64748b;
+    }
+
+    /* Log de Atualizações */
+    .log-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-height: 250px;
+    }
+
+    .log-list {
+      list-style: none;
+      overflow-y: auto;
+      font-size: 0.78rem;
+      font-family: 'Consolas', monospace;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 0.35rem;
+      padding-right: 0.3rem;
+    }
+
+    .log-item {
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 3px solid var(--color-neutral);
+    }
+
+    .log-item.updated {
+      border-left-color: #22c55e;
+      background: rgba(34, 197, 94, 0.08);
+      color: #bbf7d0;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-title">
+      <h1>🏥 Algoritmo de Floyd — Passo a Passo Visual</h1>
+      <p>Simulação dos 3 Laços Aninhados: <code>k</code> (Intermediário) • <code>i</code> (Origem) • <code>j</code> (Destino)</p>
+    </div>
+
+    <div class="legend-badges">
+      <span class="badge badge-k">● k: Intermediário (Pivô)</span>
+      <span class="badge badge-i">● i: Origem</span>
+      <span class="badge badge-j">● j: Destino</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Coluna da Esquerda: Controles, Grafo e Fórmula -->
+    <div class="left-panel">
+      <!-- Barra de Controle do Laço -->
+      <div class="card control-bar">
+        <div class="control-buttons">
+          <button class="btn btn-primary" id="btn-play" onclick="togglePlay()">
+            <span id="play-icon">▶</span> <span id="play-text">Iniciar Execução</span>
+          </button>
+          <button class="btn" id="btn-step" onclick="stepForward()">Passo ➡</button>
+          <button class="btn btn-success" onclick="nextImprovement()">Próxima Melhoria ⏩</button>
+          <button class="btn" onclick="nextK()">Próximo k ⏭️</button>
+          <button class="btn" onclick="resetSimulation()">↺ Reiniciar</button>
+        </div>
+
+        <div class="speed-control">
+          <span>Velocidade:</span>
+          <input type="range" id="speed-slider" min="50" max="1500" value="450" step="50" onchange="updateSpeed()">
+          <span id="speed-label">450ms</span>
+        </div>
+      </div>
+
+      <!-- Container do Grafo SVG -->
+      <div class="graph-container">
+        <svg id="graph-svg" viewBox="0 0 780 430">
+          <g id="edges-layer"></g>
+          <g id="flow-layer"></g>
+          <g id="labels-layer"></g>
+          <g id="nodes-layer"></g>
+        </svg>
+      </div>
+
+      <!-- Card da Expressão do Laço -->
+      <div class="formula-card">
+        <div class="formula-header">
+          Condição do Floyd: <code>se dist[i][k] + dist[k][j] &lt; dist[i][j]</code>
+        </div>
+        <div class="formula-expression" id="formula-display">
+          <span>Aguardando início... Clique em <strong>Passo ➡</strong> ou <strong>Iniciar</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna da Direita: Matriz Dinâmica e Log -->
+    <div class="right-panel">
+      <!-- Matriz de Distâncias Atualizada em Tempo Real -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+          <h2 style="font-size: 0.95rem; font-weight: 700; color: #fff;">Matriz <code>dist[7][7]</code> em Tempo Real</h2>
+          <span id="loop-state-badge" style="font-size: 0.75rem; font-weight: 700; color: var(--color-k);">k = 0, i = 0, j = 0</span>
+        </div>
+        <div class="table-container">
+          <table class="matrix-table" id="matrix-table"></table>
+        </div>
+      </div>
+
+      <!-- Log de Atualizações Encontradas -->
+      <div class="card log-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <h2 style="font-size: 0.85rem; font-weight: 700; color: #fff;">Histórico de Encurtamentos de Caminho</h2>
+          <span id="updates-count" style="font-size: 0.75rem; color: #4ade80; font-weight: 700;">0 melhorias</span>
+        </div>
+        <ul class="log-list" id="log-list">
+          <li class="log-item" style="color: var(--text-muted);">Inicie a simulação para registrar as melhorias encontradas pelo Floyd.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const INF = 999999;
+    const V = 7;
+
+    // Cidades na exata ordem do código C do usuário
+    const cidades = [
+      "Iporá", "Israelândia", "Amorinópolis", "Córrego do Ouro",
+      "Jaupaci", "Fazenda Nova", "São Luís de Montes Belos"
+    ];
+
+    const siglas = ["IPO", "ISR", "AMO", "COU", "JAU", "FNO", "SLMB"];
+
+    // Posições espaciais harmonizadas no SVG
+    const nodes = [
+      { id: 0, sigla: "IPO", nome: "Iporá", x: 140, y: 210 },
+      { id: 1, sigla: "ISR", nome: "Israelândia", x: 310, y: 130 },
+      { id: 2, sigla: "AMO", nome: "Amorinópolis", x: 190, y: 340 },
+      { id: 3, sigla: "COU", nome: "Córrego do Ouro", x: 410, y: 350 },
+      { id: 4, sigla: "JAU", nome: "Jaupaci", x: 300, y: 240 },
+      { id: 5, sigla: "FNO", nome: "Fazenda Nova", x: 490, y: 140 },
+      { id: 6, sigla: "SLMB", nome: "São Luís M. B.", x: 650, y: 260 }
+    ];
+
+    // Matriz inicial de adjacência (conforme o código C)
+    const initialDist = [
+      [  0,  26,  24, INF,  30, INF, INF],
+      [ 26,   0, INF, INF, INF,  30, INF],
+      [ 24, INF,   0,  35, INF, INF, INF],
+      [INF, INF,  35,   0, INF, INF,  50],
+      [ 30, INF, INF, INF,   0,  35, INF],
+      [INF,  30, INF, INF,  35,   0,  60],
+      [INF, INF, INF,  50, INF,  60,   0]
+    ];
+
+    // 8 Estradas diretas
+    const directEdges = [
+      { u: 0, v: 1, w: 26 },
+      { u: 0, v: 2, w: 24 },
+      { u: 0, v: 4, w: 30 },
+      { u: 1, v: 5, w: 30 },
+      { u: 2, v: 3, w: 35 },
+      { u: 4, v: 5, w: 35 },
+      { u: 3, v: 6, w: 50 },
+      { u: 5, v: 6, w: 60 }
+    ];
+
+    // Estado da simulação
+    let dist = JSON.parse(JSON.stringify(initialDist));
+    let curK = 0, curI = 0, curJ = 0;
+    let isRunning = false;
+    let timer = null;
+    let stepDelay = 450;
+    let totalUpdates = 0;
+    let lastUpdatedCell = null;
+
+    // Elementos SVG
+    const svg = document.getElementById("graph-svg");
+    const edgesLayer = document.getElementById("edges-layer");
+    const flowLayer = document.getElementById("flow-layer");
+    const labelsLayer = document.getElementById("labels-layer");
+    const nodesLayer = document.getElementById("nodes-layer");
+
+    // Inicializa o grafo base no SVG
+    function initGraphSVG() {
+      edgesLayer.innerHTML = "";
+      labelsLayer.innerHTML = "";
+
+      directEdges.forEach((edge, idx) => {
+        const u = nodes[edge.u];
+        const v = nodes[edge.v];
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", u.x);
+        line.setAttribute("y1", u.y);
+        line.setAttribute("x2", v.x);
+        line.setAttribute("y2", v.y);
+        line.setAttribute("class", "edge-base");
+        line.setAttribute("id", `edge-base-${edge.u}-${edge.v}`);
+        edgesLayer.appendChild(line);
+
+        const midX = (u.x + v.x) / 2;
+        const midY = (u.y + v.y) / 2;
+
+        const gLabel = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", midX - 18);
+        rect.setAttribute("y", midY - 9);
+        rect.setAttribute("width", 36);
+        rect.setAttribute("height", 18);
+        rect.setAttribute("class", "edge-label-bg");
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", midX);
+        text.setAttribute("y", midY);
+        text.setAttribute("class", "edge-label-text");
+        text.textContent = `${edge.w}k`;
+
+        gLabel.appendChild(rect);
+        gLabel.appendChild(text);
+        labelsLayer.appendChild(gLabel);
+      });
+
+      renderNodesSVG();
+    }
+
+    function renderNodesSVG() {
+      nodesLayer.innerHTML = "";
+      nodes.forEach((node) => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "node-group");
+        g.setAttribute("id", `node-g-${node.id}`);
+        g.setAttribute("transform", `translate(${node.x}, ${node.y})`);
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("r", 20);
+        circle.setAttribute("class", "node-circle");
+        circle.setAttribute("id", `circle-${node.id}`);
+
+        const textAbbr = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textAbbr.setAttribute("class", "node-abbr");
+        textAbbr.setAttribute("y", 1);
+        textAbbr.textContent = node.sigla;
+
+        const textTitle = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textTitle.setAttribute("class", "node-title");
+        textTitle.setAttribute("y", 34);
+        textTitle.textContent = node.nome;
+
+        const roleText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        roleText.setAttribute("class", "node-role-badge");
+        roleText.setAttribute("id", `role-${node.id}`);
+        roleText.setAttribute("y", -28);
+
+        g.appendChild(circle);
+        g.appendChild(textAbbr);
+        g.appendChild(textTitle);
+        g.appendChild(roleText);
+        nodesLayer.appendChild(g);
+      });
+    }
+
+    function updateGraphHighlights() {
+      // 1. Limpa papéis e classes dos nós
+      nodes.forEach(n => {
+        const c = document.getElementById(`circle-${n.id}`);
+        const r = document.getElementById(`role-${n.id}`);
+        c.className.baseVal = "node-circle";
+        r.textContent = "";
+      });
+
+      // 2. Destaca nós k, i, j
+      const kNode = nodes[curK];
+      const iNode = nodes[curI];
+      const jNode = nodes[curJ];
+
+      const cK = document.getElementById(`circle-${curK}`);
+      const cI = document.getElementById(`circle-${curI}`);
+      const cJ = document.getElementById(`circle-${curJ}`);
+
+      const rK = document.getElementById(`role-${curK}`);
+      const rI = document.getElementById(`role-${curI}`);
+      const rJ = document.getElementById(`role-${curJ}`);
+
+      cK.classList.add("node-k");
+      rK.textContent = "★ k (Pivô)";
+      rK.setAttribute("fill", "var(--color-k)");
+
+      cI.classList.add("node-i");
+      rI.textContent = "i (Origem)";
+      rI.setAttribute("fill", "var(--color-i)");
+
+      cJ.classList.add("node-j");
+      rJ.textContent = "j (Destino)";
+      rJ.setAttribute("fill", "var(--color-j)");
+
+      // Se coincidirem, trata sobreposições
+      if (curI === curK) rI.textContent = "i = k (Origem e Pivô)";
+      if (curJ === curK) rJ.textContent = "j = k (Destino e Pivô)";
+      if (curI === curJ) rI.textContent = "i = j";
+
+      // 3. Atualiza fluxos de arestas no SVG
+      flowLayer.innerHTML = "";
+
+      // Linha de i até k
+      if (curI !== curK && dist[curI][curK] < INF) {
+        const lineIK = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        lineIK.setAttribute("x1", iNode.x);
+        lineIK.setAttribute("y1", iNode.y);
+        lineIK.setAttribute("x2", kNode.x);
+        lineIK.setAttribute("y2", kNode.y);
+        lineIK.setAttribute("class", "edge-flow-ik");
+        flowLayer.appendChild(lineIK);
+      }
+
+      // Linha de k até j
+      if (curK !== curJ && dist[curK][curJ] < INF) {
+        const lineKJ = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        lineKJ.setAttribute("x1", kNode.x);
+        lineKJ.setAttribute("y1", kNode.y);
+        lineKJ.setAttribute("x2", jNode.x);
+        lineKJ.setAttribute("y2", jNode.y);
+        lineKJ.setAttribute("class", "edge-flow-kj");
+        flowLayer.appendChild(lineKJ);
+      }
+    }
+
+    // Renderiza e atualiza tabela da Matriz
+    function renderMatrixTable() {
+      const table = document.getElementById("matrix-table");
+      let header = `<tr><th></th>` + siglas.map((s, idx) => {
+        let cls = "";
+        if (idx === curJ) cls = "th-j";
+        else if (idx === curK) cls = "th-k";
+        return `<th class="${cls}">${s}</th>`;
+      }).join("") + `</tr>`;
+
+      let rows = "";
+      for (let i = 0; i < V; i++) {
+        let thClass = "";
+        if (i === curI) thClass = "th-i";
+        else if (i === curK) thClass = "th-k";
+
+        rows += `<tr><th class="${thClass}">${siglas[i]}</th>`;
+        for (let j = 0; j < V; j++) {
+          const val = dist[i][j];
+          const valStr = (val >= INF) ? "∞" : val;
+
+          let cellClass = "";
+          if (i === curI && j === curJ) {
+            cellClass = "cell-ij";
+          } else if (i === curI && j === curK) {
+            cellClass = "cell-ik";
+          } else if (i === curK && j === curJ) {
+            cellClass = "cell-kj";
+          } else if (i === curI) {
+            cellClass = "row-i";
+          } else if (j === curJ) {
+            cellClass = "col-j";
+          }
+
+          if (val >= INF) cellClass += " inf-val";
+          if (lastUpdatedCell && lastUpdatedCell.i === i && lastUpdatedCell.j === j) {
+            cellClass += " just-updated";
+          }
+
+          rows += `<td class="${cellClass}">${valStr}</td>`;
+        }
+        rows += `</tr>`;
+      }
+
+      table.innerHTML = header + rows;
+    }
+
+    // Atualiza o painel da fórmula matemática
+    function updateFormulaDisplay(wasUpdated, oldVal, newVal, dik, dkj) {
+      const display = document.getElementById("formula-display");
+      const sI = siglas[curI], sJ = siglas[curJ], sK = siglas[curK];
+      const dikStr = (dik >= INF) ? "∞" : dik;
+      const dkjStr = (dkj >= INF) ? "∞" : dkj;
+      const oldStr = (oldVal >= INF) ? "∞" : oldVal;
+      const sumStr = (dik >= INF || dkj >= INF) ? "∞" : (dik + dkj);
+
+      let resultBadge = "";
+      if (wasUpdated) {
+        resultBadge = `<span class="formula-result-tag res-updated">✅ ATUALIZA dist[${sI}][${sJ}] = ${newVal}</span>`;
+      } else {
+        resultBadge = `<span class="formula-result-tag res-no-change">⏭️ Não compensa (${sumStr} ≥ ${oldStr})</span>`;
+      }
+
+      display.innerHTML = `
+        <div>
+          dist[<span class="term-ik">${sI}</span>][<span class="term-k">${sK}</span>] (<strong>${dikStr}</strong>) + 
+          dist[<span class="term-k">${sK}</span>][<span class="term-kj">${sJ}</span>] (<strong>${dkjStr}</strong>) = <strong>${sumStr}</strong> 
+          vs 
+          dist[<span class="term-ij">${sI}</span>][<span class="term-ij">${sJ}</span>] (<strong>${oldStr}</strong>)
+        </div>
+        ${resultBadge}
+      `;
+    }
+
+    // Executa um passo do laço de Floyd
+    function executeSingleStep() {
+      if (curK >= V) {
+        pause();
+        alert("🎉 O algoritmo de Floyd finalizou todos os 7 intermediários!");
+        return false;
+      }
+
+      const dik = dist[curI][curK];
+      const dkj = dist[curK][curJ];
+      const currentDij = dist[curI][curJ];
+      let didUpdate = false;
+
+      lastUpdatedCell = null;
+
+      if (dik !== INF && dkj !== INF) {
+        if (dik + dkj < currentDij) {
+          const newDist = dik + dkj;
+          dist[curI][curJ] = newDist;
+          didUpdate = true;
+          totalUpdates++;
+          lastUpdatedCell = { i: curI, j: curJ };
+
+          // Registra no Log
+          addLogEntry(curK, curI, curJ, currentDij, newDist);
+        }
+      }
+
+      updateFormulaDisplay(didUpdate, currentDij, dist[curI][curJ], dik, dkj);
+      updateGraphHighlights();
+      renderMatrixTable();
+
+      document.getElementById("loop-state-badge").textContent = `k = ${curK} (${siglas[curK]}), i = ${curI} (${siglas[curI]}), j = ${curJ} (${siglas[curJ]})`;
+      document.getElementById("updates-count").textContent = `${totalUpdates} melhorias`;
+
+      // Avança os índices do laço
+      advanceIndices();
+      return didUpdate;
+    }
+
+    function advanceIndices() {
+      curJ++;
+      if (curJ >= V) {
+        curJ = 0;
+        curI++;
+        if (curI >= V) {
+          curI = 0;
+          curK++;
+        }
+      }
+    }
+
+    function addLogEntry(k, i, j, oldV, newV) {
+      const list = document.getElementById("log-list");
+      const li = document.createElement("li");
+      li.className = "log-item updated";
+      const oldStr = (oldV >= INF) ? "∞" : `${oldV} km`;
+      li.innerHTML = `<strong>k=${siglas[k]}:</strong> dist[${siglas[i]}][${siglas[j]}] encurtada de <strong>${oldStr}</strong> para <strong style="color:#4ade80;">${newV} km</strong> (via ${cidades[k]})`;
+      list.appendChild(li);
+    }
+
+    // Controles de Play/Pause
+    function togglePlay() {
+      if (isRunning) {
+        pause();
+      } else {
+        play();
+      }
+    }
+
+    function play() {
+      if (curK >= V) resetSimulation();
+      isRunning = true;
+      document.getElementById("play-icon").textContent = "⏸";
+      document.getElementById("play-text").textContent = "Pausar";
+      document.getElementById("btn-step").disabled = true;
+
+      timer = setInterval(() => {
+        executeSingleStep();
+        if (curK >= V) pause();
+      }, stepDelay);
+    }
+
+    function pause() {
+      isRunning = false;
+      clearInterval(timer);
+      document.getElementById("play-icon").textContent = "▶";
+      document.getElementById("play-text").textContent = "Continuar";
+      document.getElementById("btn-step").disabled = false;
+    }
+
+    function stepForward() {
+      pause();
+      executeSingleStep();
+    }
+
+    function nextImprovement() {
+      pause();
+      let steps = 0;
+      while (curK < V && steps < 400) {
+        steps++;
+        const updated = executeSingleStep();
+        if (updated) break;
+      }
+    }
+
+    function nextK() {
+      pause();
+      const targetK = curK + 1;
+      while (curK < targetK && curK < V) {
+        executeSingleStep();
+      }
+    }
+
+    function resetSimulation() {
+      pause();
+      dist = JSON.parse(JSON.stringify(initialDist));
+      curK = 0; curI = 0; curJ = 0;
+      totalUpdates = 0;
+      lastUpdatedCell = null;
+
+      document.getElementById("log-list").innerHTML = `<li class="log-item" style="color: var(--text-muted);">Simulação reiniciada. Clique em Passo ou Iniciar.</li>`;
+      document.getElementById("updates-count").textContent = `0 melhorias`;
+      document.getElementById("loop-state-badge").textContent = `k = 0, i = 0, j = 0`;
+      document.getElementById("formula-display").innerHTML = `<span>Aguardando início... Clique em <strong>Passo ➡</strong> ou <strong>Iniciar</strong></span>`;
+
+      updateGraphHighlights();
+      renderMatrixTable();
+    }
+
+    function updateSpeed() {
+      const val = document.getElementById("speed-slider").value;
+      stepDelay = parseInt(val);
+      document.getElementById("speed-label").textContent = `${stepDelay}ms`;
+      if (isRunning) {
+        pause();
+        play();
+      }
+    }
+
+    // Inicialização da Página
+    initGraphSVG();
+    updateGraphHighlights();
+    renderMatrixTable();
+  </script>
+</body>
+</html>
