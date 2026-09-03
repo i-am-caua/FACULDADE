@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Árvore Trie — Visualização da Inserção (main.c)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-card: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-dark: #334155;
+      --primary: #2563eb;
+      --primary-light: #dbeafe;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --warning: #ea580c;
+      --warning-light: #ffedd5;
+      --purple: #7c3aed;
+      --purple-light: #ede9fe;
+      --code-bg: #0b1120;
+      --code-text: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f1f5f9;
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--bg);
+      color: #fff;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--border-dark);
+      flex-shrink: 0;
+    }
+
+    .header-info h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-info h1 .badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: #3b82f6;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-info .sub {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    /* BARRA DE AÇÃO / INSERÇÃO */
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 2px 4px 2px 8px;
+    }
+
+    .input-group label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-right: 6px;
+      font-weight: 500;
+    }
+
+    .input-group input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      font-weight: 600;
+      width: 110px;
+      outline: none;
+      text-transform: lowercase;
+    }
+
+    .input-group input::placeholder {
+      color: #64748b;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: #e2e8f0;
+      border-color: var(--border-dark);
+    }
+    .btn-secondary:hover {
+      background: #334155;
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: #f87171;
+      border-color: #7f1d1d;
+    }
+    .btn-danger:hover {
+      background: #7f1d1d;
+      color: #fff;
+    }
+
+    /* PRESETS BAR */
+    .presets-bar {
+      background: #1e293b;
+      padding: 6px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #cbd5e1;
+      border-bottom: 1px solid #334155;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
+    .presets-bar span {
+      font-weight: 600;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    .preset-btn {
+      background: #0f172a;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      white-space: nowrap;
+    }
+    .preset-btn:hover {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }
+    .preset-btn.active {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }
+
+    /* MAIN LAYOUT */
+    main {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.18fr 1fr;
+      gap: 12px;
+      padding: 12px 18px;
+    }
+
+    .panel {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.2px;
+    }
+
+    .panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-icon {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: #475569;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      border-radius: 6px;
+    }
+    .btn-icon:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    /* ÁREA DA ÁRVORE (SVG) */
+    .tree-container {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      background: radial-gradient(#e2e8f0 1.2px, transparent 1.2px);
+      background-size: 20px 20px;
+      background-color: #fcfdfe;
+      overflow: hidden;
+    }
+
+    #treeSvg {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      user-select: none;
+    }
+    #treeSvg:active {
+      cursor: grabbing;
+    }
+
+    /* LEGENDA NO RODAPÉ DO SVG */
+    .tree-legend {
+      padding: 6px 14px;
+      border-top: 1px solid var(--border);
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: #475569;
+      flex-shrink: 0;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-node {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 2px solid #64748b;
+      background: #fff;
+    }
+    .legend-node.root { background: #e2e8f0; border-color: #475569; }
+    .legend-node.word { background: #dcfce7; border-color: #16a34a; }
+    .legend-node.active { background: #dbeafe; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.25); }
+    .legend-node.new { background: #ffedd5; border-color: #ea580c; }
+
+    /* PAINEL DIREITO: DETALHES */
+    .details-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 13px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* CARD EXPLICAÇÃO */
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .step-badge.info { background: #dbeafe; color: #1e40af; }
+    .step-badge.success { background: #dcfce7; color: #166534; }
+    .step-badge.warning { background: #ffedd5; color: #9a3412; }
+
+    .step-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #0f172a;
+      margin-top: 6px;
+    }
+    .step-desc b {
+      color: var(--primary);
+    }
+    .step-desc code {
+      font-family: Consolas, monospace;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #0f172a;
+      font-size: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* STRING RIBBON (palavra) */
+    .string-ribbon {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      overflow-x: auto;
+    }
+
+    .char-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 36px;
+    }
+
+    .char-box {
+      width: 36px;
+      height: 38px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Consolas, monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+      transition: all 0.2s;
+    }
+
+    .char-cell.active .char-box {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .char-cell.next .char-box {
+      border-color: var(--purple);
+      background: var(--purple-light);
+      color: var(--purple);
+    }
+
+    .char-label {
+      font-size: 10px;
+      font-family: Consolas, monospace;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .char-cell.active .char-label { color: var(--primary); font-weight: 700; }
+    .char-cell.next .char-label { color: var(--purple); font-weight: 700; }
+
+    .calc-pill {
+      margin-top: 8px;
+      font-size: 12px;
+      background: #f1f5f9;
+      border-left: 3px solid var(--warning);
+      padding: 6px 10px;
+      border-radius: 0 6px 6px 0;
+      font-family: Consolas, monospace;
+      color: #334155;
+    }
+
+    /* CÓDIGO C */
+    .code-container {
+      background: var(--code-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+
+    pre.code-block {
+      font-family: Consolas, 'Fira Code', 'Courier New', monospace;
+      font-size: 11.5px;
+      line-height: 1.65;
+      color: var(--code-text);
+      padding: 8px 0;
+      overflow-x: auto;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      padding: 1px 12px;
+      border-left: 3px solid transparent;
+      transition: background 0.15s;
+      white-space: pre;
+    }
+
+    .code-line.active {
+      background: #1e3a5f;
+      border-left-color: #f59e0b;
+    }
+
+    .code-line .line-num {
+      width: 24px;
+      color: #475569;
+      user-select: none;
+      text-align: right;
+      margin-right: 12px;
+      font-size: 10.5px;
+    }
+
+    .code-line.active .line-num {
+      color: #f59e0b;
+      font-weight: bold;
+    }
+
+    .code-comment {
+      color: #64748b;
+      font-style: italic;
+    }
+    .code-kw { color: #f472b6; font-weight: 600; }
+    .code-type { color: #38bdf8; }
+    .code-fn { color: #a78bfa; font-weight: 600; }
+    .code-num { color: #fbbf24; }
+    .code-str { color: #34d399; }
+
+    /* PILHA DE CHAMADAS (CALL STACK) */
+    .stack-frames {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stack-frame {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11.5px;
+      font-family: Consolas, monospace;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .stack-frame.active {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+      font-weight: 600;
+    }
+
+    .stack-depth {
+      color: #64748b;
+      font-size: 10.5px;
+    }
+    .stack-frame.active .stack-depth {
+      color: #2563eb;
+    }
+
+    /* TABELA DE VARIÁVEIS */
+    table.var-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    table.var-table th {
+      text-align: left;
+      padding: 4px 8px;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.var-table td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      font-family: Consolas, monospace;
+    }
+
+    table.var-table tr.changed td {
+      background: #ecfdf5;
+    }
+    table.var-table tr.changed td:last-child {
+      color: #059669;
+      font-weight: 700;
+    }
+
+    /* INSPEÇÃO DO NÓ (VETOR LETRAS[26]) */
+    .node-inspection {
+      display: grid;
+      grid-template-columns: repeat(13, 1fr);
+      gap: 3px;
+      margin-top: 6px;
+    }
+
+    .array-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3px 2px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+      font-size: 10px;
+      background: #f8fafc;
+    }
+
+    .array-cell.has-child {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      color: #1e40af;
+      font-weight: 700;
+    }
+
+    .array-cell.current-idx {
+      background: #ffedd5;
+      border-color: #f97316;
+      color: #c2410c;
+      font-weight: 700;
+      box-shadow: 0 0 0 2px rgba(249,115,22,0.3);
+    }
+
+    /* CONTROLES INFERIORES */
+    footer.controls-bar {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      box-shadow: 0 -2px 6px -1px rgb(0 0 0 / 0.05);
+    }
+
+    .playback-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-ctrl {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12.5px;
+    }
+    .btn-ctrl:hover:not(:disabled) {
+      background: #f1f5f9;
+    }
+    .btn-ctrl:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-ctrl.play {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      min-width: 105px;
+      justify-content: center;
+    }
+    .btn-ctrl.play:hover:not(:disabled) {
+      background: var(--primary-dark);
+    }
+
+    .step-slider-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-slider-container input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .step-counter {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #334155;
+      white-space: nowrap;
+      min-width: 90px;
+    }
+
+    .speed-select {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: #64748b;
+    }
+
+    .speed-select select {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 11.5px;
+      background: #fff;
+      color: #1e293b;
+      outline: none;
+    }
+
+    .keyboard-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .kbd {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: Consolas, monospace;
+      color: #475569;
+    }
+
+    /* MODAL DE AJUDA */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      width: 580px;
+      max-width: 90vw;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: var(--bg);
+      color: #fff;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body {
+      padding: 18px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #334155;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .modal-body h3 {
+      color: #0f172a;
+      margin: 12px 0 6px;
+      font-size: 14px;
+    }
+    .modal-body h3:first-child { margin-top: 0; }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 1080px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+      .keyboard-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABEÇALHO -->
+  <header>
+    <div class="header-info">
+      <h1>
+        Árvore Trie — Inserção Passo a Passo
+        <span class="badge">AED IV</span>
+      </h1>
+      <div class="sub">
+        Simulador interativo baseado em <code>02-AED-IV/02-Exercicios/arvores/03-triee/main.c</code> · Prof. Thamer Horbylon Nascimento
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <div class="input-group">
+        <label for="wordInput">Palavra:</label>
+        <input type="text" id="wordInput" placeholder="ex: sol" maxlength="15" autocomplete="off" spellcheck="false" value="sol">
+      </div>
+      <button class="btn-primary" id="btnInsertCustom">
+        <span>+</span> Inserir na Trie
+      </button>
+      <button class="btn-danger" id="btnClearTree" title="Reinicia a árvore vazia">
+        <span>🗑</span> Limpar Árvore
+      </button>
+      <button class="btn-secondary" id="btnHelp" title="Explicação e Teoria">
+        <span>?</span> Como Funciona
+      </button>
+    </div>
+  </header>
+
+  <!-- BARRA DE CENÁRIOS RÁPIDOS -->
+  <div class="presets-bar">
+    <span>Cenários de Teste:</span>
+    <button class="preset-btn active" data-word="sol" data-reset="true">1. Inserir "sol" (Árvore Vazia)</button>
+    <button class="preset-btn" data-word="sola" data-reset="false">2. Inserir "sola" (Extensão de Prefixo)</button>
+    <button class="preset-btn" data-word="som" data-reset="false">3. Inserir "som" (Ramificação em 'o')</button>
+    <button class="preset-btn" data-word="so" data-reset="false">4. Inserir "so" (Marcar Palavra Existente)</button>
+    <button class="preset-btn" data-word="solteiro" data-reset="false">5. Inserir "solteiro"</button>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main>
+    <!-- PAINEL ESQUERDO: ÁRVORE SVG -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>Representação Visual da Árvore Trie</span>
+          <span id="treeStats" style="font-size:11px;font-weight:500;color:#64748b;">(Nós: 0 · Palavras: 0)</span>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-icon" id="btnZoomIn" title="Aproximar">+</button>
+          <button class="btn-icon" id="btnZoomOut" title="Afastar">-</button>
+          <button class="btn-icon" id="btnResetView" title="Centralizar visualização">⟲ Ajustar</button>
+        </div>
+      </div>
+
+      <div class="tree-container" id="treeContainer">
+        <svg id="treeSvg">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#94a3b8" />
+            </marker>
+            <marker id="arrow-active" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ea580c" />
+            </marker>
+            <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+          <g id="svgViewport">
+            <g id="edgesLayer"></g>
+            <g id="nodesLayer"></g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="tree-legend">
+        <div class="legend-item">
+          <span class="legend-node root"></span> Raiz (vazia)
+        </div>
+        <div class="legend-item">
+          <span class="legend-node"></span> Prefixo intermediário (palavra = 0)
+        </div>
+        <div class="legend-item">
+          <span class="legend-node word"></span> Fim de palavra válida (palavra = 1)
+        </div>
+        <div class="legend-item">
+          <span class="legend-node active"></span> Nó apontado por <code>*raiz</code>
+        </div>
+        <div class="legend-item">
+          <span class="legend-node new"></span> Nó criado neste passo (malloc)
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL DIREITO: CÓDIGO, PILHA E VARIÁVEIS -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>Depurador e Estado da Execução</span>
+        </div>
+        <div id="statusBadgeContainer">
+          <span class="step-badge info" id="statusBadge">Passo 0</span>
+        </div>
+      </div>
+
+      <div class="details-scroll">
+        <!-- 1. Explicação Didática -->
+        <div class="card">
+          <div class="card-title">
+            <span>Explicação Didática do Passo</span>
+            <span id="callDepthBadge" style="color:#64748b;font-size:11px;">Recursão: Nível 0</span>
+          </div>
+          <div class="step-desc" id="stepExplanation">
+            Clique em <b>Reproduzir</b> ou use as setas para iniciar a inserção passo a passo da palavra.
+          </div>
+
+          <!-- Fita da palavra (String Ribbon) -->
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;">
+              Ponteiro <code>palavra</code> e Caractere Atual:
+            </div>
+            <div class="string-ribbon" id="stringRibbon"></div>
+          </div>
+
+          <!-- Cálculo ASCII de index -->
+          <div class="calc-pill" id="calcPill" style="display:none;">
+            Cálculo do índice: <code>index = palavra[0] - 'a'</code> → <b id="calcPillText"></b>
+          </div>
+        </div>
+
+        <!-- 2. Código C executado -->
+        <div class="card" style="padding: 6px;">
+          <div class="card-title" style="padding: 4px 8px 0 8px; margin-bottom: 4px;">
+            <span>Código Executado — <code>inserir</code> (main.c:19-29)</span>
+          </div>
+          <div class="code-container">
+            <pre class="code-block" id="codeBlock">
+<div class="code-line" id="code-19"><span class="line-num">19</span><span class="code-type">void</span> <span class="code-fn">inserir</span> (<span class="code-type">No</span> **<span class="code-str">raiz</span>, <span class="code-type">char</span> *<span class="code-str">palavra</span>) {</div>
+<div class="code-line" id="code-20"><span class="line-num">20</span>    </div>
+<div class="code-line" id="code-21"><span class="line-num">21</span>    <span class="code-kw">if</span> (*raiz == <span class="code-num">NULL</span>) *raiz = <span class="code-fn">criarNo</span>();</div>
+<div class="code-line" id="code-22"><span class="line-num">22</span>    <span class="code-type">int</span> index = palavra[<span class="code-num">0</span>] - <span class="code-str">'a'</span>;</div>
+<div class="code-line" id="code-23"><span class="line-num">23</span>    <span class="code-kw">if</span> ((*raiz)->letras[index] == <span class="code-num">NULL</span>) (*raiz)->letras[index] = <span class="code-fn">criarNo</span>();</div>
+<div class="code-line" id="code-24"><span class="line-num">24</span>    <span class="code-kw">if</span> (palavra[<span class="code-num">1</span>] == <span class="code-str">'\0'</span>) {</div>
+<div class="code-line" id="code-25"><span class="line-num">25</span>        (*raiz)->letras[index]->palavra = <span class="code-num">1</span>;</div>
+<div class="code-line" id="code-26"><span class="line-num">26</span>        <span class="code-kw">return</span>;</div>
+<div class="code-line" id="code-27"><span class="line-num">27</span>    }</div>
+<div class="code-line" id="code-28"><span class="line-num">28</span>    <span class="code-fn">inserir</span> (&((*raiz)->letras[index]), palavra + <span class="code-num">1</span>);   </div>
+<div class="code-line" id="code-29"><span class="line-num">29</span>}</div></pre>
+          </div>
+        </div>
+
+        <!-- 3. Pilha de Chamadas Recursivas -->
+        <div class="card">
+          <div class="card-title">
+            <span>Pilha de Chamadas Recursivas (Call Stack)</span>
+            <span id="stackCount" style="font-size:11px;color:#64748b;">1 frame</span>
+          </div>
+          <div class="stack-frames" id="stackFrames"></div>
+        </div>
+
+        <!-- 4. Variáveis e Ponteiros -->
+        <div class="card">
+          <div class="card-title">
+            <span>Valores das Variáveis no Frame Ativo</span>
+          </div>
+          <table class="var-table">
+            <thead>
+              <tr>
+                <th style="width:30%">Expressão</th>
+                <th style="width:35%">Tipo</th>
+                <th style="width:35%">Valor Atual</th>
+              </tr>
+            </thead>
+            <tbody id="varTableBody">
+              <tr><td><code>raiz</code></td><td><code>No**</code></td><td id="v-raiz">—</td></tr>
+              <tr><td><code>*raiz</code></td><td><code>No*</code></td><td id="v-derefRaiz">—</td></tr>
+              <tr><td><code>palavra</code></td><td><code>char*</code></td><td id="v-palavra">—</td></tr>
+              <tr><td><code>palavra[0]</code></td><td><code>char</code></td><td id="v-palavra0">—</td></tr>
+              <tr><td><code>index</code></td><td><code>int</code></td><td id="v-index">—</td></tr>
+              <tr><td><code>(*raiz)->letras[index]</code></td><td><code>No*</code></td><td id="v-letrasIndex">—</td></tr>
+              <tr><td><code>palavra[1]</code></td><td><code>char</code></td><td id="v-palavra1">—</td></tr>
+              <tr><td><code>palavra[1] == '\0'</code></td><td><code>bool</code></td><td id="v-isTerm">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 5. Inspeção do Nó Ativo (Vetor letras[26]) -->
+        <div class="card">
+          <div class="card-title">
+            <span>Inspeção do Nó Atual: <code>letras[26]</code></span>
+            <span id="inspectedNodeName" style="color:var(--primary);font-size:11px;">Raiz (#0)</span>
+          </div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:6px;">
+            Cada nó possui 26 ponteiros (índices 0 a 25 para 'a' até 'z'):
+          </div>
+          <div class="node-inspection" id="nodeInspectionGrid"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BARRA DE CONTROLES INFERIOR -->
+  <footer class="controls-bar">
+    <div class="playback-buttons">
+      <button class="btn-ctrl" id="btnFirst" title="Primeiro passo (Home)">⏮ Início</button>
+      <button class="btn-ctrl" id="btnPrev" title="Passo anterior (Seta esquerda)">◀ Voltar</button>
+      <button class="btn-ctrl play" id="btnPlay" title="Reproduzir / Pausar (Espaço)">▶ Reproduzir</button>
+      <button class="btn-ctrl" id="btnNext" title="Próximo passo (Seta direita)">Avançar ▶</button>
+      <button class="btn-ctrl" id="btnLast" title="Último passo (End)">Fim ⏭</button>
+    </div>
+
+    <div class="step-slider-container">
+      <input type="range" id="stepSlider" min="0" max="0" value="0">
+      <span class="step-counter" id="stepCounter">Passo 0 de 0</span>
+    </div>
+
+    <div class="speed-select">
+      <label for="speedSelect">Velocidade:</label>
+      <select id="speedSelect">
+        <option value="1800">0.5x (Lento)</option>
+        <option value="1000" selected>1.0x (Normal)</option>
+        <option value="500">2.0x (Rápido)</option>
+        <option value="250">4.0x (Muito Rápido)</option>
+      </select>
+    </div>
+
+    <div class="keyboard-hint">
+      <span class="kbd">←</span> <span class="kbd">→</span> navegar
+      <span class="kbd">Espaço</span> play/pause
+    </div>
+  </footer>
+
+  <!-- MODAL DE AJUDA / CONCEITOS -->
+  <div class="modal-backdrop" id="helpModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 style="font-size:15px;">Como Funciona a Inserção na Árvore Trie</h2>
+        <button class="btn-icon" id="btnCloseHelp" style="background:transparent;color:#fff;border:none;font-size:18px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <h3>O que é uma Árvore Trie (Árvore de Prefixos)?</h3>
+        <p>
+          A árvore Trie é uma estrutura de dados de árvore ordenada para armazenamento de strings. Diferente de uma árvore binária de busca, os nós da Trie não guardam a palavra inteira: cada nó representa um caractere ou prefixo compartilhado.
+        </p>
+
+        <h3>A Estrutura do Nó (struct No em C)</h3>
+        <p>
+          Em <code>main.c</code>, cada nó tem:
+        </p>
+        <pre style="background:#0f172a;color:#e2e8f0;padding:8px 12px;border-radius:6px;margin:6px 0;font-family:Consolas,monospace;font-size:12px;">
+typedef struct No {
+    struct No *letras[26]; // 26 ponteiros para filhos ('a' a 'z')
+    int palavra;           // 1 se termina uma palavra válida, 0 caso contrário
+} No;</pre>
+
+        <h3>A Função Inserir Recursiva</h3>
+        <p>
+          A função recebe um ponteiro duplo <code>No **raiz</code> e o sufixo da palavra a inserir:
+        </p>
+        <ol style="margin-left: 20px; margin-top: 6px;">
+          <li><b>Criação da raiz:</b> se <code>*raiz == NULL</code>, aloca o nó raiz inicial.</li>
+          <li><b>Cálculo de índice:</b> <code>index = palavra[0] - 'a'</code> descobre qual ponteiro no vetor <code>letras[26]</code> corresponde à letra atual.</li>
+          <li><b>Compartilhamento de prefixo:</b> se <code>(*raiz)->letras[index] == NULL</code>, cria um novo nó filho; se já existir, aproveita o caminho existente!</li>
+          <li><b>Caso Base:</b> se <code>palavra[1] == '\0'</code> (última letra), marca o nó com <code>palavra = 1</code> e retorna!</li>
+          <li><b>Passo Recursivo:</b> se ainda houver letras, chama <code>inserir(&((*raiz)->letras[index]), palavra + 1)</code> avançando na palavra.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    /* ==========================================================================
+       ESTRUTURA DE DADOS DA TRIE E GERADOR DE PASSOS
+       ========================================================================== */
+
+    let nextNodeId = 0;
+
+    class TrieNode {
+      constructor(letter = '', prefix = '') {
+        this.id = nextNodeId++;
+        this.letter = letter;       // caractere do nó ('', 's', 'o', etc.)
+        this.prefix = prefix;       // prefixo completo acumulado
+        this.isWord = 0;            // flag: 1 se for palavra completa, 0 se apenas prefixo
+        this.children = new Array(26).fill(null); // ponteiros letras[26]
+        this.memAddr = '0x' + (0x1000 + this.id * 0x38).toString(16).toUpperCase();
+      }
+
+      clone() {
+        const copy = new TrieNode(this.letter, this.prefix);
+        copy.id = this.id;
+        copy.memAddr = this.memAddr;
+        copy.isWord = this.isWord;
+        for (let i = 0; i < 26; i++) {
+          if (this.children[i]) {
+            copy.children[i] = this.children[i].clone();
+          }
+        }
+        return copy;
+      }
+    }
+
+    // Estado global da Trie e do histórico de passos
+    let globalRoot = null; // Árvore persistente entre inserções
+    let steps = [];        // Lista de passos da simulação atual
+    let currentStep = 0;
+    let isPlaying = false;
+    let playTimer = null;
+
+    // Função de clone profundo de uma árvore completa
+    function cloneTree(node) {
+      if (!node) return null;
+      return node.clone();
+    }
+
+    // Busca um nó por ID na árvore
+    function findNodeById(node, id) {
+      if (!node) return null;
+      if (node.id === id) return node;
+      for (let i = 0; i < 26; i++) {
+        if (node.children[i]) {
+          const found = findNodeById(node.children[i], id);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    // Conta total de nós e total de palavras na árvore
+    function getTreeStats(node) {
+      if (!node) return { totalNodes: 0, totalWords: 0 };
+      let nodes = 1;
+      let words = node.isWord ? 1 : 0;
+      for (let i = 0; i < 26; i++) {
+        if (node.children[i]) {
+          const s = getTreeStats(node.children[i]);
+          nodes += s.totalNodes;
+          words += s.totalWords;
+        }
+      }
+      return { totalNodes: nodes, totalWords: words };
+    }
+
+    /* ==========================================================================
+       SIMULADOR DA EXECUÇÃO DE inserir()
+       Gera micro-passos fiéis ao código C de main.c:19-29
+       ========================================================================== */
+
+    function simulateInsertion(initialRoot, word) {
+      const generatedSteps = [];
+      const wordClean = word.trim().toLowerCase();
+      if (!wordClean || !/^[a-z]+$/.test(wordClean)) {
+        alert('Por favor, digite apenas letras de a até z.');
+        return null;
+      }
+
+      // Trabalharemos numa cópia de trabalho da árvore
+      let root = cloneTree(initialRoot);
+      const callStack = [];
+
+      // Função auxiliar para registrar um passo
+      function recordStep(params) {
+        generatedSteps.push({
+          line: params.line,
+          explanation: params.explanation,
+          badgeType: params.badgeType || 'info',
+          badgeText: params.badgeText || `Linha ${params.line}`,
+          treeSnapshot: cloneTree(root),
+          activeNodeId: params.activeNodeId !== undefined ? params.activeNodeId : null,
+          activeChildIndex: params.activeChildIndex !== undefined ? params.activeChildIndex : null,
+          newCreatedNodeId: params.newCreatedNodeId !== undefined ? params.newCreatedNodeId : null,
+          highlightEdge: params.highlightEdge || null,
+          callStack: JSON.parse(JSON.stringify(callStack)),
+          fullWord: wordClean,
+          currentSuffix: params.currentSuffix || '',
+          charIndex: params.charIndex !== undefined ? params.charIndex : 0,
+          vars: {
+            raiz: params.vars?.raiz || '&raiz',
+            derefRaiz: params.vars?.derefRaiz || (root ? root.memAddr : 'NULL'),
+            palavra: `"${params.currentSuffix}"`,
+            palavra0: params.currentSuffix && params.currentSuffix[0] ? `'${params.currentSuffix[0]}'` : "'\\0'",
+            index: params.activeChildIndex !== null && params.activeChildIndex !== undefined ? params.activeChildIndex : '—',
+            letrasIndex: params.vars?.letrasIndex || '—',
+            palavra1: params.currentSuffix && params.currentSuffix[1] ? `'${params.currentSuffix[1]}'` : "'\\0'",
+            isTerm: params.currentSuffix ? (params.currentSuffix.length <= 1 ? 'true (1)' : 'false (0)') : '—',
+            changedVar: params.changedVar || null
+          }
+        });
+      }
+
+      // Execução simulada recursiva
+      function runInserir(nodeRef, suffix, depth, parentNode, parentChildIndex, prefixSoFar) {
+        const frameInfo = {
+          depth: depth,
+          fnCall: `inserir(&(${parentNode ? `No#${parentNode.id}->letras[${parentChildIndex}]` : 'raiz'}), "${suffix}")`,
+          suffix: suffix
+        };
+        callStack.push(frameInfo);
+
+        // Passo 1: Entrada na função
+        recordStep({
+          line: 19,
+          explanation: `<b>Chamada recursiva (Nível ${depth}):</b> <code>inserir(&${parentNode ? `letras[${parentChildIndex}]` : 'raiz'}, "${suffix}")</code> iniciada. O ponteiro <code>palavra</code> aponta para o sufixo <code>"${suffix}"</code>.`,
+          badgeType: 'info',
+          badgeText: `Chamada (Nível ${depth})`,
+          currentSuffix: suffix,
+          activeNodeId: nodeRef ? nodeRef.id : null,
+          vars: {
+            raiz: parentNode ? `&(${parentNode.memAddr}->letras[${parentChildIndex}])` : '&raiz',
+            derefRaiz: nodeRef ? `${nodeRef.memAddr} (${nodeRef.prefix ? `"${nodeRef.prefix}"` : 'raiz'})` : 'NULL'
+          }
+        });
+
+        // Passo 2: Linha 21: if (*raiz == NULL) *raiz = criarNo();
+        if (nodeRef === null) {
+          recordStep({
+            line: 21,
+            explanation: `<b>Linha 21:</b> <code>if (*raiz == NULL)</code> → Verdadeiro! O ponteiro é <code>NULL</code>, logo a raiz da árvore ainda não existia.`,
+            badgeType: 'warning',
+            badgeText: 'malloc: Raiz',
+            currentSuffix: suffix,
+            activeNodeId: null,
+            vars: {
+              raiz: '&raiz',
+              derefRaiz: 'NULL'
+            }
+          });
+
+          // Aloca raiz
+          nodeRef = new TrieNode('', '');
+          root = nodeRef;
+
+          recordStep({
+            line: 21,
+            explanation: `<b>Linha 21:</b> <code>*raiz = criarNo()</code> executado! Alocado novo nó raiz com endereço <code>${nodeRef.memAddr}</code>. Todos os 26 ponteiros de <code>letras</code> foram inicializados como <code>NULL</code> e <code>palavra = 0</code>.`,
+            badgeType: 'success',
+            badgeText: 'Raiz criada',
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            newCreatedNodeId: nodeRef.id,
+            changedVar: 'derefRaiz',
+            vars: {
+              raiz: '&raiz',
+              derefRaiz: `${nodeRef.memAddr} (raiz)`
+            }
+          });
+        } else {
+          recordStep({
+            line: 21,
+            explanation: `<b>Linha 21:</b> <code>if (*raiz == NULL)</code> → Falso! O nó atual já existe na memória (endereço <code>${nodeRef.memAddr}</code>). Não é necessário alocar novo nó raiz.`,
+            badgeType: 'info',
+            badgeText: 'Nó existente',
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            vars: {
+              raiz: parentNode ? `&(${parentNode.memAddr}->letras[${parentChildIndex}])` : '&raiz',
+              derefRaiz: `${nodeRef.memAddr} (${nodeRef.prefix ? `"${nodeRef.prefix}"` : 'raiz'})`
+            }
+          });
+        }
+
+        // Passo 3: Linha 22: int index = palavra[0] - 'a';
+        const ch = suffix[0];
+        const index = ch.charCodeAt(0) - 'a'.charCodeAt(0);
+        const charAscii = ch.charCodeAt(0);
+
+        recordStep({
+          line: 22,
+          explanation: `<b>Linha 22:</b> Caractere atual é <code>palavra[0] = '${ch}'</code>. Mapeamento ASCII: <code>'${ch}' (código ${charAscii}) - 'a' (código 97) = ${index}</code>. Portanto, será acessado o índice <b>${index}</b> no vetor <code>letras[26]</code>.`,
+          badgeType: 'warning',
+          badgeText: `index = ${index}`,
+          currentSuffix: suffix,
+          activeNodeId: nodeRef.id,
+          activeChildIndex: index,
+          changedVar: 'index',
+          vars: {
+            raiz: parentNode ? `&(${parentNode.memAddr}->letras[${parentChildIndex}])` : '&raiz',
+            derefRaiz: `${nodeRef.memAddr} (${nodeRef.prefix ? `"${nodeRef.prefix}"` : 'raiz'})`,
+            index: `${index} ('${ch}')`
+          }
+        });
+
+        // Passo 4: Linha 23: if ((*raiz)->letras[index] == NULL) (*raiz)->letras[index] = criarNo();
+        const childExisted = nodeRef.children[index] !== null;
+        if (!childExisted) {
+          recordStep({
+            line: 23,
+            explanation: `<b>Linha 23:</b> <code>if ((*raiz)->letras[${index}] == NULL)</code> → Verdadeiro! Ainda não há ramo para a letra <code>'${ch}'</code> a partir deste nó.`,
+            badgeType: 'info',
+            badgeText: 'Ramo inexistente',
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            activeChildIndex: index,
+            vars: {
+              index: index,
+              letrasIndex: 'NULL'
+            }
+          });
+
+          // Aloca filho
+          const newPrefix = prefixSoFar + ch;
+          const newChild = new TrieNode(ch, newPrefix);
+          nodeRef.children[index] = newChild;
+
+          recordStep({
+            line: 23,
+            explanation: `<b>Linha 23:</b> <code>(*raiz)->letras[${index}] = criarNo()</code> executado! Criado nó filho <b>#${newChild.id}</b> para a letra <code>'${ch}'</code> (endereço <code>${newChild.memAddr}</code>).`,
+            badgeType: 'success',
+            badgeText: `malloc: nó '${ch}'`,
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            activeChildIndex: index,
+            newCreatedNodeId: newChild.id,
+            highlightEdge: { from: nodeRef.id, to: newChild.id },
+            changedVar: 'letrasIndex',
+            vars: {
+              index: index,
+              letrasIndex: `${newChild.memAddr} ('${ch}')`
+            }
+          });
+        } else {
+          const existingChild = nodeRef.children[index];
+          recordStep({
+            line: 23,
+            explanation: `<b>Linha 23:</b> <code>if ((*raiz)->letras[${index}] == NULL)</code> → Falso! O nó para a letra <code>'${ch}'</code> já existe (endereço <code>${existingChild.memAddr}</code>). <b>Reutilizando o prefixo comum existente na Trie!</b>`,
+            badgeType: 'info',
+            badgeText: `Reaproveita '${ch}'`,
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            activeChildIndex: index,
+            highlightEdge: { from: nodeRef.id, to: existingChild.id },
+            vars: {
+              index: index,
+              letrasIndex: `${existingChild.memAddr} ('${ch}')`
+            }
+          });
+        }
+
+        const currentTargetNode = nodeRef.children[index];
+
+        // Passo 5: Linha 24: if (palavra[1] == '\0')
+        const nextChar = suffix[1] || '\0';
+        const isLastLetter = suffix.length === 1 || suffix[1] === '\0';
+
+        if (isLastLetter) {
+          recordStep({
+            line: 24,
+            explanation: `<b>Linha 24:</b> <code>if (palavra[1] == '\\0')</code> → <b>Verdadeiro!</b> Chegamos à última letra da palavra <code>"${wordClean}"</code>. Entrando no bloco de marcação de palavra completa.`,
+            badgeType: 'success',
+            badgeText: 'Fim da palavra!',
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            activeChildIndex: index,
+            highlightEdge: { from: nodeRef.id, to: currentTargetNode.id },
+            changedVar: 'isTerm',
+            vars: {
+              index: index,
+              letrasIndex: `${currentTargetNode.memAddr} ('${ch}')`,
+              palavra1: "'\\0'",
+              isTerm: 'true (1)'
+            }
+          });
+
+          // Linha 25: (*raiz)->letras[index]->palavra = 1;
+          currentTargetNode.isWord = 1;
+
+          recordStep({
+            line: 25,
+            explanation: `<b>Linha 25:</b> <code>(*raiz)->letras[${index}]->palavra = 1;</code> executado! O campo <code>palavra</code> do nó <b>#${currentTargetNode.id} ('${ch}')</b> agora vale <b>1</b>. A palavra completa <code>"${wordClean}"</code> agora é reconhecida na Trie!`,
+            badgeType: 'success',
+            badgeText: 'palavra = 1 ★',
+            currentSuffix: suffix,
+            activeNodeId: currentTargetNode.id,
+            activeChildIndex: index,
+            vars: {
+              index: index,
+              letrasIndex: `${currentTargetNode.memAddr} ('${ch}')`,
+              palavra1: "'\\0'",
+              isTerm: 'true (1)'
+            }
+          });
+
+          // Linha 26: return;
+          recordStep({
+            line: 26,
+            explanation: `<b>Linha 26:</b> <code>return;</code> executado! Caso base finalizado com sucesso. Encerrando o nível ${depth} da recursão e retornando para a chamada anterior.`,
+            badgeType: 'info',
+            badgeText: `return (Nível ${depth})`,
+            currentSuffix: suffix,
+            activeNodeId: currentTargetNode.id,
+            vars: {
+              index: index,
+              letrasIndex: `${currentTargetNode.memAddr} ('${ch}')`
+            }
+          });
+
+          callStack.pop();
+          return;
+        } else {
+          recordStep({
+            line: 24,
+            explanation: `<b>Linha 24:</b> <code>if (palavra[1] == '\\0')</code> → Falso! O próximo caractere é <code>'${nextChar}'</code> (diferente de <code>'\\0'</code>). Ainda restam caracteres a serem inseridos.`,
+            badgeType: 'info',
+            badgeText: `Continua ('${nextChar}')`,
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            activeChildIndex: index,
+            highlightEdge: { from: nodeRef.id, to: currentTargetNode.id },
+            vars: {
+              index: index,
+              letrasIndex: `${currentTargetNode.memAddr} ('${ch}')`,
+              palavra1: `'${nextChar}'`,
+              isTerm: 'false (0)'
+            }
+          });
+
+          // Linha 28: inserir (&((*raiz)->letras[index]), palavra + 1);
+          const nextSuffix = suffix.substring(1);
+          recordStep({
+            line: 28,
+            explanation: `<b>Linha 28:</b> Chamada recursiva: <code>inserir(&((*raiz)->letras[${index}]), palavra + 1)</code>. Avança o ponteiro de string para o sufixo <code>"${nextSuffix}"</code> e passa o endereço do nó filho <code>'${ch}'</code>.`,
+            badgeType: 'info',
+            badgeText: 'Avança sufixo',
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            activeChildIndex: index,
+            highlightEdge: { from: nodeRef.id, to: currentTargetNode.id },
+            vars: {
+              index: index,
+              letrasIndex: `${currentTargetNode.memAddr} ('${ch}')`
+            }
+          });
+
+          // Executa a chamada recursiva
+          runInserir(currentTargetNode, nextSuffix, depth + 1, nodeRef, index, prefixSoFar + ch);
+
+          // Retorno da chamada recursiva
+          recordStep({
+            line: 28,
+            explanation: `<b>Linha 28 (Retorno):</b> A chamada filha retornou. O nível ${depth} da recursão concluiu seu processamento para a letra <code>'${ch}'</code>.`,
+            badgeType: 'info',
+            badgeText: `Desempilha (Nível ${depth})`,
+            currentSuffix: suffix,
+            activeNodeId: nodeRef.id,
+            activeChildIndex: index,
+            vars: {
+              index: index,
+              letrasIndex: `${currentTargetNode.memAddr} ('${ch}')`
+            }
+          });
+
+          callStack.pop();
+        }
+      }
+
+      // Inicia a recursão a partir da raiz
+      runInserir(root, wordClean, 0, null, 0, '');
+
+      // Passo final de conclusão
+      generatedSteps.push({
+        line: 29,
+        explanation: `🎉 <b>Inserção concluída!</b> A palavra <code>"${wordClean}"</code> foi totalmente inserida na Árvore Trie. Todas as chamadas recursivas retornaram para a <code>main()</code>.`,
+        badgeType: 'success',
+        badgeText: 'Concluído com Sucesso',
+        treeSnapshot: cloneTree(root),
+        activeNodeId: null,
+        activeChildIndex: null,
+        newCreatedNodeId: null,
+        highlightEdge: null,
+        callStack: [],
+        fullWord: wordClean,
+        currentSuffix: wordClean,
+        charIndex: 0,
+        vars: {
+          raiz: '&raiz',
+          derefRaiz: root.memAddr,
+          palavra: `"${wordClean}"`,
+          palavra0: '—',
+          index: '—',
+          letrasIndex: '—',
+          palavra1: '—',
+          isTerm: '—'
+        }
+      });
+
+      return { steps: generatedSteps, finalTree: root };
+    }
+
+    /* ==========================================================================
+       ALGORITMO DE LAYOUT HIERÁRQUICO DA ÁRVORE (SVG)
+       ========================================================================== */
+
+    const NODE_RADIUS = 20;
+    const LEVEL_HEIGHT = 80;
+    const SIBLING_GAP = 14;
+
+    function layoutTree(root) {
+      if (!root) return { nodes: [], edges: [], width: 400, height: 200, minX: 0, maxX: 400 };
+
+      const nodes = [];
+      const edges = [];
+
+      // Passo 1: Calcular largura das subárvores (pós-ordem)
+      function computeSubtreeWidth(node) {
+        const activeChildren = [];
+        for (let i = 0; i < 26; i++) {
+          if (node.children[i]) {
+            activeChildren.push({ charIndex: i, child: node.children[i] });
+          }
+        }
+        node._activeChildren = activeChildren;
+
+        if (activeChildren.length === 0) {
+          node._width = NODE_RADIUS * 2 + SIBLING_GAP;
+          return node._width;
+        }
+
+        let totalW = 0;
+        for (const item of activeChildren) {
+          totalW += computeSubtreeWidth(item.child);
+        }
+        node._width = Math.max(NODE_RADIUS * 2 + SIBLING_GAP, totalW);
+        return node._width;
+      }
+
+      computeSubtreeWidth(root);
+
+      // Passo 2: Posicionar nós (pré-ordem)
+      function assignPositions(node, depth, leftX) {
+        const y = depth * LEVEL_HEIGHT + 45;
+        const width = node._width;
+        let x = leftX + width / 2;
+
+        node._x = x;
+        node._y = y;
+        node._depth = depth;
+
+        nodes.push({
+          id: node.id,
+          letter: node.letter,
+          prefix: node.prefix,
+          isWord: node.isWord,
+          memAddr: node.memAddr,
+          x: x,
+          y: y,
+          rawNode: node
+        });
+
+        let currentChildLeft = leftX;
+        for (const item of node._activeChildren) {
+          const child = item.child;
+          assignPositions(child, depth + 1, currentChildLeft);
+
+          edges.push({
+            fromId: node.id,
+            toId: child.id,
+            fromX: x,
+            fromY: y + NODE_RADIUS,
+            toX: child._x,
+            toY: child._y - NODE_RADIUS,
+            letter: child.letter,
+            index: item.charIndex
+          });
+
+          currentChildLeft += child._width;
+        }
+      }
+
+      assignPositions(root, 0, 40);
+
+      // Limites da árvore para ajuste do SVG
+      let minX = Infinity, maxX = -Infinity, maxY = 0;
+      for (const n of nodes) {
+        if (n.x < minX) minX = n.x;
+        if (n.x > maxX) maxX = n.x;
+        if (n.y > maxY) maxY = n.y;
+      }
+
+      const totalWidth = Math.max(500, (maxX - minX) + 120);
+      const totalHeight = Math.max(300, maxY + 70);
+
+      return { nodes, edges, width: totalWidth, height: totalHeight, minX: minX - 60, maxX: maxX + 60 };
+    }
+
+    /* ==========================================================================
+       RENDERIZADOR DO SVG DA ÁRVORE COM ZOOM E PAN
+       ========================================================================== */
+
+    let zoomLevel = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    const svgElement = document.getElementById('treeSvg');
+    const svgViewport = document.getElementById('svgViewport');
+    const nodesLayer = document.getElementById('nodesLayer');
+    const edgesLayer = document.getElementById('edgesLayer');
+
+    function applySvgTransform() {
+      svgViewport.setAttribute('transform', `translate(${panX}, ${panY}) scale(${zoomLevel})`);
+    }
+
+    function renderTreeSvg(tree, activeNodeId, newCreatedNodeId, highlightEdge) {
+      nodesLayer.innerHTML = '';
+      edgesLayer.innerHTML = '';
+
+      if (!tree) {
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', '200');
+        text.setAttribute('y', '120');
+        text.setAttribute('fill', '#94a3b8');
+        text.setAttribute('font-size', '14');
+        text.setAttribute('text-anchor', 'middle');
+        text.textContent = 'Árvore Trie vazia (*raiz == NULL)';
+        nodesLayer.appendChild(text);
+        return;
+      }
+
+      const layout = layoutTree(tree);
+
+      // Renderiza arestas
+      for (const edge of layout.edges) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const isEdgeActive = highlightEdge && highlightEdge.from === edge.fromId && highlightEdge.to === edge.toId;
+
+        // Linha da aresta
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const midY = (edge.fromY + edge.toY) / 2;
+        const d = `M ${edge.fromX} ${edge.fromY} C ${edge.fromX} ${midY}, ${edge.toX} ${midY}, ${edge.toX} ${edge.toY}`;
+        path.setAttribute('d', d);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', isEdgeActive ? '#ea580c' : '#94a3b8');
+        path.setAttribute('stroke-width', isEdgeActive ? '3' : '1.8');
+        if (isEdgeActive) {
+          path.setAttribute('stroke-dasharray', '6 3');
+          path.setAttribute('marker-end', 'url(#arrow-active)');
+        } else {
+          path.setAttribute('marker-end', 'url(#arrow)');
+        }
+        g.appendChild(path);
+
+        // Rótulo da letra da transição na aresta
+        const labelX = (edge.fromX + edge.toX) / 2;
+        const labelY = (edge.fromY + edge.toY) / 2;
+
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', labelX - 11);
+        rect.setAttribute('y', labelY - 9);
+        rect.setAttribute('width', '22');
+        rect.setAttribute('height', '18');
+        rect.setAttribute('rx', '4');
+        rect.setAttribute('fill', isEdgeActive ? '#ffedd5' : '#ffffff');
+        rect.setAttribute('stroke', isEdgeActive ? '#ea580c' : '#cbd5e1');
+        rect.setAttribute('stroke-width', '1');
+        g.appendChild(rect);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', labelX);
+        text.setAttribute('y', labelY + 4);
+        text.setAttribute('fill', isEdgeActive ? '#c2410c' : '#334155');
+        text.setAttribute('font-size', '11');
+        text.setAttribute('font-family', 'Consolas, monospace');
+        text.setAttribute('font-weight', 'bold');
+        text.setAttribute('text-anchor', 'middle');
+        text.textContent = edge.letter;
+        g.appendChild(text);
+
+        edgesLayer.appendChild(g);
+      }
+
+      // Renderiza nós
+      for (const node of layout.nodes) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'node-group');
+        g.setAttribute('style', 'cursor: pointer;');
+        g.setAttribute('data-id', node.id);
+
+        const isRoot = node.letter === '';
+        const isActive = node.id === activeNodeId;
+        const isNew = node.id === newCreatedNodeId;
+        const isWord = node.isWord === 1;
+
+        // Círculo de destaque / pulso se ativo
+        if (isActive) {
+          const halo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          halo.setAttribute('cx', node.x);
+          halo.setAttribute('cy', node.y);
+          halo.setAttribute('r', NODE_RADIUS + 7);
+          halo.setAttribute('fill', 'none');
+          halo.setAttribute('stroke', '#3b82f6');
+          halo.setAttribute('stroke-width', '3');
+          halo.setAttribute('stroke-opacity', '0.5');
+          halo.setAttribute('filter', 'url(#glow)');
+          g.appendChild(halo);
+        }
+
+        // Círculo principal do nó
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', node.x);
+        circle.setAttribute('cy', node.y);
+        circle.setAttribute('r', NODE_RADIUS);
+
+        if (isNew) {
+          circle.setAttribute('fill', '#ffedd5');
+          circle.setAttribute('stroke', '#ea580c');
+          circle.setAttribute('stroke-width', '2.5');
+        } else if (isActive) {
+          circle.setAttribute('fill', '#dbeafe');
+          circle.setAttribute('stroke', '#2563eb');
+          circle.setAttribute('stroke-width', '2.5');
+        } else if (isWord) {
+          circle.setAttribute('fill', '#dcfce7');
+          circle.setAttribute('stroke', '#16a34a');
+          circle.setAttribute('stroke-width', '2.5');
+        } else if (isRoot) {
+          circle.setAttribute('fill', '#f1f5f9');
+          circle.setAttribute('stroke', '#64748b');
+          circle.setAttribute('stroke-width', '2');
+        } else {
+          circle.setAttribute('fill', '#ffffff');
+          circle.setAttribute('stroke', '#64748b');
+          circle.setAttribute('stroke-width', '2');
+        }
+        g.appendChild(circle);
+
+        // Anel interno para palavra completa (duplo círculo estilo autômato finito / Trie)
+        if (isWord) {
+          const innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          innerRing.setAttribute('cx', node.x);
+          innerRing.setAttribute('cy', node.y);
+          innerRing.setAttribute('r', NODE_RADIUS - 4.5);
+          innerRing.setAttribute('fill', 'none');
+          innerRing.setAttribute('stroke', '#16a34a');
+          innerRing.setAttribute('stroke-width', '1.5');
+          g.appendChild(innerRing);
+        }
+
+        // Texto da letra dentro do nó
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', node.x);
+        text.setAttribute('y', node.y + (isRoot ? 4 : 5));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-family', isRoot ? 'system-ui, sans-serif' : 'Consolas, monospace');
+        text.setAttribute('font-size', isRoot ? '10' : '15');
+        text.setAttribute('font-weight', 'bold');
+        text.setAttribute('fill', isWord ? '#166534' : '#0f172a');
+        text.textContent = isRoot ? 'raiz' : node.letter;
+        g.appendChild(text);
+
+        // Badge / Rótulo de ponteiro (*raiz) ou palavra
+        if (isActive) {
+          const badge = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const badgeRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          badgeRect.setAttribute('x', node.x - 22);
+          badgeRect.setAttribute('y', node.y - NODE_RADIUS - 16);
+          badgeRect.setAttribute('width', '44');
+          badgeRect.setAttribute('height', '14');
+          badgeRect.setAttribute('rx', '4');
+          badgeRect.setAttribute('fill', '#2563eb');
+          badge.appendChild(badgeRect);
+
+          const badgeTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          badgeTxt.setAttribute('x', node.x);
+          badgeTxt.setAttribute('y', node.y - NODE_RADIUS - 5);
+          badgeTxt.setAttribute('fill', '#fff');
+          badgeTxt.setAttribute('font-size', '9');
+          badgeTxt.setAttribute('font-family', 'Consolas, monospace');
+          badgeTxt.setAttribute('font-weight', 'bold');
+          badgeTxt.setAttribute('text-anchor', 'middle');
+          badgeTxt.textContent = '*raiz';
+          badge.appendChild(badgeTxt);
+          g.appendChild(badge);
+        }
+
+        // Se for palavra completa, exibe a palavra inteira em badge verde abaixo
+        if (isWord) {
+          const wordBadge = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          const wText = `"${node.prefix}"`;
+          const badgeW = Math.max(34, wText.length * 7 + 10);
+
+          const bRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bRect.setAttribute('x', node.x - badgeW / 2);
+          bRect.setAttribute('y', node.y + NODE_RADIUS + 4);
+          bRect.setAttribute('width', badgeW);
+          bRect.setAttribute('height', '15');
+          bRect.setAttribute('rx', '4');
+          bRect.setAttribute('fill', '#16a34a');
+          wordBadge.appendChild(bRect);
+
+          const bTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          bTxt.setAttribute('x', node.x);
+          bTxt.setAttribute('y', node.y + NODE_RADIUS + 15);
+          bTxt.setAttribute('fill', '#ffffff');
+          bTxt.setAttribute('font-size', '9.5');
+          bTxt.setAttribute('font-family', 'Consolas, monospace');
+          bTxt.setAttribute('font-weight', 'bold');
+          bTxt.setAttribute('text-anchor', 'middle');
+          bTxt.textContent = wText;
+          wordBadge.appendChild(bTxt);
+          g.appendChild(wordBadge);
+        }
+
+        // Evento de clique para inspecionar o nó no painel
+        g.addEventListener('click', () => {
+          inspectNode(node.rawNode);
+        });
+
+        nodesLayer.appendChild(g);
+      }
+    }
+
+    // Auto-ajuste de câmera no SVG
+    function centerAndFitTree(tree) {
+      if (!tree) {
+        panX = 50;
+        panY = 40;
+        zoomLevel = 1.0;
+        applySvgTransform();
+        return;
+      }
+      const layout = layoutTree(tree);
+      const container = document.getElementById('treeContainer');
+      const cw = container.clientWidth || 500;
+      const ch = container.clientHeight || 400;
+
+      const scaleX = (cw - 60) / Math.max(layout.width, 100);
+      const scaleY = (ch - 60) / Math.max(layout.height, 100);
+      zoomLevel = Math.min(1.2, Math.max(0.65, Math.min(scaleX, scaleY)));
+
+      panX = (cw - layout.width * zoomLevel) / 2;
+      panY = 25;
+      applySvgTransform();
+    }
+
+    // Manipuladores de mouse para Pan e Zoom
+    svgElement.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.node-group')) return; // Clique no nó tem prioridade
+      isDragging = true;
+      dragStartX = e.clientX - panX;
+      dragStartY = e.clientY - panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      panX = e.clientX - dragStartX;
+      panY = e.clientY - dragStartY;
+      applySvgTransform();
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    svgElement.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      const newZoom = Math.min(2.5, Math.max(0.4, zoomLevel * zoomFactor));
+
+      const rect = svgElement.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      panX = mouseX - (mouseX - panX) * (newZoom / zoomLevel);
+      panY = mouseY - (mouseY - panY) * (newZoom / zoomLevel);
+      zoomLevel = newZoom;
+      applySvgTransform();
+    }, { passive: false });
+
+    /* ==========================================================================
+       ATUALIZAÇÃO DA INTERFACE COM O PASSO ATUAL
+       ========================================================================== */
+
+    function updateStepUI(stepIndex) {
+      if (steps.length === 0) return;
+      currentStep = Math.max(0, Math.min(stepIndex, steps.length - 1));
+      const step = steps[currentStep];
+
+      // 1. Contador e slider
+      document.getElementById('stepCounter').textContent = `Passo ${currentStep + 1} de ${steps.length}`;
+      document.getElementById('stepSlider').value = currentStep;
+
+      // 2. Badge de status
+      const badge = document.getElementById('statusBadge');
+      badge.className = `step-badge ${step.badgeType}`;
+      badge.textContent = step.badgeText;
+
+      // 3. Explicação em pt-BR
+      document.getElementById('stepExplanation').innerHTML = step.explanation;
+
+      // 4. Nível de recursão
+      const stackLen = step.callStack ? step.callStack.length : 0;
+      document.getElementById('callDepthBadge').textContent = `Recursão: Nível ${stackLen > 0 ? stackLen - 1 : 0}`;
+
+      // 5. Linha de código destacada
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      const activeLineEl = document.getElementById(`code-${step.line}`);
+      if (activeLineEl) {
+        activeLineEl.classList.add('active');
+        activeLineEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // 6. Fita da string (String Ribbon)
+      renderStringRibbon(step.fullWord, step.currentSuffix, step.line);
+
+      // 7. Pilha de chamadas (Call Stack)
+      renderCallStack(step.callStack);
+
+      // 8. Tabela de variáveis
+      renderVarTable(step.vars);
+
+      // 9. Cálculo ASCII
+      const calcPill = document.getElementById('calcPill');
+      if (step.activeChildIndex !== null && step.activeChildIndex !== undefined && step.currentSuffix && step.currentSuffix[0]) {
+        calcPill.style.display = 'block';
+        const ch = step.currentSuffix[0];
+        document.getElementById('calcPillText').innerHTML =
+          `'${ch}' (ASCII ${ch.charCodeAt(0)}) - 'a' (97) = <b>${step.activeChildIndex}</b>`;
+      } else {
+        calcPill.style.display = 'none';
+      }
+
+      // 10. Atualiza árvore no SVG
+      renderTreeSvg(step.treeSnapshot, step.activeNodeId, step.newCreatedNodeId, step.highlightEdge);
+
+      // 11. Atualiza estatísticas da árvore
+      const stats = getTreeStats(step.treeSnapshot);
+      document.getElementById('treeStats').textContent = `(Nós: ${stats.totalNodes} · Palavras: ${stats.totalWords})`;
+
+      // 12. Inspeciona o nó ativo atual no grid de letras[26]
+      const activeNode = findNodeById(step.treeSnapshot, step.activeNodeId);
+      if (activeNode) {
+        inspectNode(activeNode, step.activeChildIndex);
+      } else if (step.treeSnapshot) {
+        inspectNode(step.treeSnapshot, step.activeChildIndex);
+      }
+
+      // 13. Botões de navegação
+      document.getElementById('btnFirst').disabled = (currentStep === 0);
+      document.getElementById('btnPrev').disabled = (currentStep === 0);
+      document.getElementById('btnNext').disabled = (currentStep === steps.length - 1);
+      document.getElementById('btnLast').disabled = (currentStep === steps.length - 1);
+
+      if (currentStep === steps.length - 1 && isPlaying) {
+        pausePlayback();
+      }
+    }
+
+    // Renderiza a fita de caracteres de palavra
+    function renderStringRibbon(fullWord, currentSuffix, currentLine) {
+      const ribbon = document.getElementById('stringRibbon');
+      ribbon.innerHTML = '';
+      if (!fullWord) return;
+
+      const suffixStart = fullWord.length - (currentSuffix ? currentSuffix.length : 0);
+
+      for (let i = 0; i < fullWord.length; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'char-cell';
+
+        const isCurrent = (i === suffixStart);
+        const isNext = (i === suffixStart + 1);
+
+        if (isCurrent) cell.classList.add('active');
+        if (isNext && currentLine >= 24) cell.classList.add('next');
+
+        const box = document.createElement('div');
+        box.className = 'char-box';
+        box.textContent = fullWord[i];
+
+        const label = document.createElement('div');
+        label.className = 'char-label';
+        if (isCurrent) label.textContent = 'palavra[0]';
+        else if (isNext) label.textContent = 'palavra[1]';
+        else label.textContent = `[${i}]`;
+
+        cell.appendChild(box);
+        cell.appendChild(label);
+        ribbon.appendChild(cell);
+      }
+
+      // Adiciona o caractere terminador nulo '\0'
+      const nullCell = document.createElement('div');
+      nullCell.className = 'char-cell';
+      const isNullCurrent = suffixStart >= fullWord.length;
+      const isNullLookahead = (suffixStart + 1 >= fullWord.length && suffixStart < fullWord.length);
+
+      if (isNullCurrent) nullCell.classList.add('active');
+      if (isNullLookahead && currentLine >= 24) nullCell.classList.add('next');
+
+      const nullBox = document.createElement('div');
+      nullBox.className = 'char-box';
+      nullBox.textContent = '\\0';
+      nullBox.style.fontSize = '12px';
+      nullBox.style.color = '#94a3b8';
+
+      const nullLabel = document.createElement('div');
+      nullLabel.className = 'char-label';
+      nullLabel.textContent = isNullLookahead ? 'palavra[1]' : 'fim';
+
+      nullCell.appendChild(nullBox);
+      nullCell.appendChild(nullLabel);
+      ribbon.appendChild(nullCell);
+    }
+
+    // Renderiza a pilha de chamadas (Call Stack)
+    function renderCallStack(stack) {
+      const container = document.getElementById('stackFrames');
+      const countEl = document.getElementById('stackCount');
+      container.innerHTML = '';
+
+      if (!stack || stack.length === 0) {
+        container.innerHTML = '<div style="font-size:12px;color:#94a3b8;font-style:italic;">Pilha vazia (execução na main)</div>';
+        countEl.textContent = '0 frames';
+        return;
+      }
+
+      countEl.textContent = `${stack.length} frame${stack.length > 1 ? 's' : ''}`;
+
+      // Exibe da chamada mais recente para a mais antiga (topo da pilha no alto)
+      for (let i = stack.length - 1; i >= 0; i--) {
+        const frame = stack[i];
+        const isTop = (i === stack.length - 1);
+
+        const el = document.createElement('div');
+        el.className = `stack-frame ${isTop ? 'active' : ''}`;
+
+        el.innerHTML = `
+          <span>${isTop ? '▶ ' : ''}${frame.fnCall}</span>
+          <span class="stack-depth">Nível ${frame.depth}</span>
+        `;
+        container.appendChild(el);
+      }
+    }
+
+    // Renderiza tabela de variáveis
+    function renderVarTable(vars) {
+      const setVal = (id, val, changed) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = val !== undefined ? val : '—';
+          const row = el.closest('tr');
+          if (row) {
+            if (changed) row.classList.add('changed');
+            else row.classList.remove('changed');
+          }
+        }
+      };
+
+      setVal('v-raiz', vars.raiz, vars.changedVar === 'raiz');
+      setVal('v-derefRaiz', vars.derefRaiz, vars.changedVar === 'derefRaiz');
+      setVal('v-palavra', vars.palavra, vars.changedVar === 'palavra');
+      setVal('v-palavra0', vars.palavra0, false);
+      setVal('v-index', vars.index, vars.changedVar === 'index');
+      setVal('v-letrasIndex', vars.letrasIndex, vars.changedVar === 'letrasIndex');
+      setVal('v-palavra1', vars.palavra1, false);
+      setVal('v-isTerm', vars.isTerm, vars.changedVar === 'isTerm');
+    }
+
+    // Inspeciona nó selecionado no painel letras[26]
+    function inspectNode(node, highlightIndex = null) {
+      if (!node) return;
+      const title = document.getElementById('inspectedNodeName');
+      title.textContent = node.letter === '' ? `Raiz (${node.memAddr})` : `Nó '${node.letter}' (${node.memAddr}, "${node.prefix}")`;
+
+      const grid = document.getElementById('nodeInspectionGrid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < 26; i++) {
+        const letter = String.fromCharCode('a'.charCodeAt(0) + i);
+        const child = node.children ? node.children[i] : null;
+
+        const cell = document.createElement('div');
+        cell.className = 'array-cell';
+        if (child) cell.classList.add('has-child');
+        if (i === highlightIndex) cell.classList.add('current-idx');
+
+        cell.title = `letras[${i}] ('${letter}') → ${child ? child.memAddr : 'NULL'}`;
+
+        const letterSpan = document.createElement('span');
+        letterSpan.style.fontWeight = 'bold';
+        letterSpan.textContent = letter;
+
+        const valSpan = document.createElement('span');
+        valSpan.style.fontSize = '8.5px';
+        valSpan.textContent = child ? '✓' : '·';
+        valSpan.style.color = child ? '#1e40af' : '#94a3b8';
+
+        cell.appendChild(letterSpan);
+        cell.appendChild(valSpan);
+        grid.appendChild(cell);
+      }
+    }
+
+    /* ==========================================================================
+       CONTROLE DE REPRODUÇÃO (PLAYBACK)
+       ========================================================================== */
+
+    function startPlayback() {
+      if (currentStep >= steps.length - 1) {
+        currentStep = 0;
+      }
+      isPlaying = true;
+      const btn = document.getElementById('btnPlay');
+      btn.textContent = '⏸ Pausar';
+      btn.style.background = '#ea580c';
+      btn.style.borderColor = '#ea580c';
+
+      const speed = parseInt(document.getElementById('speedSelect').value, 10) || 1000;
+      clearInterval(playTimer);
+      playTimer = setInterval(() => {
+        if (currentStep < steps.length - 1) {
+          updateStepUI(currentStep + 1);
+        } else {
+          pausePlayback();
+        }
+      }, speed);
+    }
+
+    function pausePlayback() {
+      isPlaying = false;
+      clearInterval(playTimer);
+      const btn = document.getElementById('btnPlay');
+      btn.textContent = '▶ Reproduzir';
+      btn.style.background = 'var(--primary)';
+      btn.style.borderColor = 'var(--primary)';
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) pausePlayback();
+      else startPlayback();
+    }
+
+    /* ==========================================================================
+       AÇÕES DE INSERÇÃO E CENÁRIOS
+       ========================================================================== */
+
+    function performInsert(word, resetTreeFirst = false) {
+      pausePlayback();
+      if (resetTreeFirst) {
+        nextNodeId = 0;
+        globalRoot = null;
+      }
+
+      const res = simulateInsertion(globalRoot, word);
+      if (!res) return;
+
+      steps = res.steps;
+      globalRoot = res.finalTree;
+
+      document.getElementById('stepSlider').max = steps.length - 1;
+      updateStepUI(0);
+      centerAndFitTree(globalRoot);
+      startPlayback();
+    }
+
+    // Inicialização e vinculação de eventos
+    window.addEventListener('DOMContentLoaded', () => {
+      // Configura botões de controle
+      document.getElementById('btnFirst').addEventListener('click', () => { pausePlayback(); updateStepUI(0); });
+      document.getElementById('btnPrev').addEventListener('click', () => { pausePlayback(); updateStepUI(currentStep - 1); });
+      document.getElementById('btnNext').addEventListener('click', () => { pausePlayback(); updateStepUI(currentStep + 1); });
+      document.getElementById('btnLast').addEventListener('click', () => { pausePlayback(); updateStepUI(steps.length - 1); });
+      document.getElementById('btnPlay').addEventListener('click', togglePlayPause);
+
+      document.getElementById('stepSlider').addEventListener('input', (e) => {
+        pausePlayback();
+        updateStepUI(parseInt(e.target.value, 10));
+      });
+
+      document.getElementById('speedSelect').addEventListener('change', () => {
+        if (isPlaying) {
+          pausePlayback();
+          startPlayback();
+        }
+      });
+
+      // Botões de Zoom do SVG
+      document.getElementById('btnZoomIn').addEventListener('click', () => {
+        zoomLevel = Math.min(2.5, zoomLevel * 1.2);
+        applySvgTransform();
+      });
+      document.getElementById('btnZoomOut').addEventListener('click', () => {
+        zoomLevel = Math.max(0.4, zoomLevel / 1.2);
+        applySvgTransform();
+      });
+      document.getElementById('btnResetView').addEventListener('click', () => {
+        centerAndFitTree(steps[currentStep] ? steps[currentStep].treeSnapshot : globalRoot);
+      });
+
+      // Ações do cabeçalho
+      document.getElementById('btnInsertCustom').addEventListener('click', () => {
+        const input = document.getElementById('wordInput');
+        const word = input.value.trim().toLowerCase();
+        if (word) {
+          performInsert(word, false);
+        }
+      });
+
+      document.getElementById('wordInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('btnInsertCustom').click();
+        }
+      });
+
+      document.getElementById('btnClearTree').addEventListener('click', () => {
+        if (confirm('Deseja realmente limpar toda a Árvore Trie?')) {
+          pausePlayback();
+          nextNodeId = 0;
+          globalRoot = null;
+          steps = [];
+          document.getElementById('stepSlider').max = 0;
+          document.getElementById('stepSlider').value = 0;
+          document.getElementById('stepCounter').textContent = 'Passo 0 de 0';
+          document.getElementById('treeStats').textContent = '(Nós: 0 · Palavras: 0)';
+          renderTreeSvg(null, null, null, null);
+          document.getElementById('stepExplanation').innerHTML = 'Árvore reiniciada. Digite uma palavra ou selecione um cenário acima para iniciar.';
+          document.getElementById('stringRibbon').innerHTML = '';
+          document.getElementById('stackFrames').innerHTML = '';
+          document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+          renderVarTable({});
+        }
+      });
+
+      // Botões de cenários rápidos
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const word = btn.dataset.word;
+          const reset = btn.dataset.reset === 'true';
+          document.getElementById('wordInput').value = word;
+          performInsert(word, reset);
+        });
+      });
+
+      // Teclas de atalho
+      window.addEventListener('keydown', (e) => {
+        if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          pausePlayback();
+          updateStepUI(currentStep + 1);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          pausePlayback();
+          updateStepUI(currentStep - 1);
+        } else if (e.key === ' ' || e.code === 'Space') {
+          e.preventDefault();
+          togglePlayPause();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          pausePlayback();
+          updateStepUI(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          pausePlayback();
+          updateStepUI(steps.length - 1);
+        }
+      });
+
+      // Modal de Ajuda
+      const helpModal = document.getElementById('helpModal');
+      document.getElementById('btnHelp').addEventListener('click', () => {
+        helpModal.classList.add('open');
+      });
+      document.getElementById('btnCloseHelp').addEventListener('click', () => {
+        helpModal.classList.remove('open');
+      });
+      helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) helpModal.classList.remove('open');
+      });
+
+      // Inicia automaticamente o primeiro cenário: "sol"
+      performInsert('sol', true);
+    });
+  </script>
+</body>
+</html>
