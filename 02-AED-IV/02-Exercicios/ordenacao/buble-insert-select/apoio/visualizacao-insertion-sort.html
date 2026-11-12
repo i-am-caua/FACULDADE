@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Insertion sort — seu código, passo a passo</title>
+  <style>
+    :root { color-scheme: dark; --fundo:#10151e; --painel:#19212e; --borda:#303d50; --texto:#edf2f9; --suave:#a8b6c9; --verde:#81e5b4; --azul:#8fbfff; --amarelo:#ffdb85; --roxo:#cbb0ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--fundo); color:var(--texto); font-family:system-ui,sans-serif; line-height:1.5; }
+    main { max-width:1460px; margin:auto; padding:28px; }
+    header { margin-bottom:24px; }
+    h1 { font-size:clamp(24px,3vw,36px); margin:4px 0; letter-spacing:-1px; }
+    h2 { font-size:17px; margin:0 0 16px; }
+    p { margin:8px 0; }
+    .etiqueta { color:var(--verde); font-size:12px; letter-spacing:2px; font-weight:700; }
+    .suave, small { color:var(--suave); }
+    .painel { background:var(--painel); border:1px solid var(--borda); border-radius:16px; padding:20px; min-width:0; }
+    .entrada { display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:14px; }
+    .entrada label { flex:1 1 290px; }
+    .entrada label span { display:block; font-size:13px; color:var(--suave); margin-bottom:6px; }
+    input[type=text], select { border:1px solid #46566e; background:#101823; color:var(--texto); border-radius:8px; padding:10px 12px; font:inherit; }
+    input[type=text] { width:100%; font-family:monospace; }
+    button { border:1px solid #46566e; background:#243349; color:var(--texto); padding:10px 14px; border-radius:8px; font:inherit; font-size:14px; cursor:pointer; }
+    button:hover:enabled { background:#344b68; }
+    button:disabled { opacity:.4; cursor:default; }
+    button.primario { background:var(--verde); border-color:var(--verde); color:#0c2820; font-weight:750; }
+    :focus-visible { outline:3px solid var(--azul); outline-offset:3px; }
+    .grade { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(420px,1fr); gap:18px; }
+    .coluna { display:grid; gap:18px; align-content:start; }
+    .cabecalho-painel { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .cabecalho-painel h2 { margin:0; }
+    .controles { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:16px 0; }
+    .controles label { font-size:13px; color:var(--suave); }
+    .controles select { padding:8px; font-size:13px; }
+    input[type=range] { width:100%; accent-color:var(--verde); cursor:pointer; }
+    .progresso { display:flex; justify-content:space-between; font-size:12px; color:var(--suave); }
+    .vetor { display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 14px; }
+    .celula { width:64px; text-align:center; position:relative; }
+    .marcadores { height:23px; font:700 12px monospace; display:flex; justify-content:center; gap:7px; }
+    .marcador-i { color:var(--roxo); }
+    .marcador-j { color:var(--amarelo); }
+    .valor { height:60px; display:grid; place-content:center; border:2px solid #44536a; border-radius:10px; background:#111a28; font:700 23px monospace; transition:background .15s; }
+    .ordenado .valor { border-color:#4a9977; background:#19362e; }
+    .comparado .valor { border-color:var(--amarelo); background:#473b24; }
+    .origem .valor { border-color:var(--azul); background:#233c5d; }
+    .destino .valor { border-color:var(--roxo); background:#403353; }
+    .lacuna .valor { border-style:dashed; }
+    .indice { font:12px monospace; color:var(--suave); margin-top:5px; }
+    .legenda { display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--suave); margin-top:14px; }
+    .legenda span::before { content:""; display:inline-block; width:8px; height:8px; border-radius:2px; background:var(--cor); margin-right:6px; }
+    .variaveis { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:18px 0; }
+    .variavel { background:#111a28; border:1px solid var(--borda); border-radius:10px; padding:10px 12px; }
+    .variavel span { color:var(--suave); display:block; font:12px monospace; }
+    .variavel strong { font:700 25px monospace; }
+    .variavel.chave { border-color:#9a7ace; }
+    .variavel.chave strong { color:var(--roxo); }
+    .explicacao { min-height:130px; border-left:3px solid var(--verde); padding:0 0 0 15px; margin-top:20px; }
+    .explicacao h3 { font-size:18px; margin:0 0 6px; }
+    .explicacao p { color:var(--suave); font-size:14px; }
+    #expressao { display:block; font:13px ui-monospace,monospace; color:var(--amarelo); white-space:pre-wrap; overflow-wrap:anywhere; margin-top:10px; }
+    .nota { font-size:13px; color:var(--suave); border-top:1px solid var(--borda); padding-top:14px; }
+    .codigo { overflow-x:auto; padding:12px 0; background:#101823; border-radius:10px; margin-top:16px; }
+    .linha { display:flex; font:13px/1.85 ui-monospace,Consolas,monospace; white-space:pre; padding-right:16px; border-left:3px solid transparent; min-width:max-content; }
+    .numero { width:44px; flex-shrink:0; text-align:right; padding-right:12px; color:#788ba5; user-select:none; }
+    .linha.ativa { background:#273e37; border-left-color:var(--verde); }
+    .linha.ativa .numero { color:var(--verde); }
+    .linha.ativa code { color:#b4f6d4; }
+    .saida { max-height:230px; overflow:auto; background:#101823; border-radius:10px; padding:8px; margin-top:12px; }
+    .saida button { display:block; text-align:left; white-space:pre; width:100%; border:0; background:transparent; padding:6px 8px; font:12px/1.5 monospace; }
+    .saida button:hover { background:#243349; }
+    .saida button.atual { background:#273e37; color:var(--verde); }
+    .saida small { display:block; padding:6px; }
+    .metricas { display:flex; gap:18px; font-size:13px; color:var(--suave); margin-top:16px; flex-wrap:wrap; }
+    .metricas strong { color:var(--texto); }
+    #erro { color:#ffaaaa; font-size:13px; min-height:20px; margin:0 0 12px; }
+    footer { margin:22px 0 0; color:var(--suave); font-size:12px; }
+    a { color:var(--azul); }
+    @media (max-width:1050px) { .grade { grid-template-columns:1fr; } }
+    @media (max-width:600px) { main { padding:16px; } .painel { padding:15px; } .variaveis { grid-template-columns:repeat(2,1fr); } .celula { width:54px; } .valor { height:52px; font-size:20px; } .linha { font-size:12px; } }
+    @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="etiqueta">AED IV / ORDENAÇÃO</div>
+    <h1>Seu insertion sort, passo a passo.</h1>
+    <p class="suave">Acompanhe a função de <a href="../exc.c">exc.c</a>: guarde a chave, abra espaço e insira no lugar certo.</p>
+  </header>
+  <form id="formulario" class="entrada">
+    <label for="entrada"><span>Vetor inicial · de 1 a 20 inteiros separados por espaço ou vírgula</span><input id="entrada" type="text" value="8, 3, 5, 2, 7" autocomplete="off" spellcheck="false" aria-describedby="erro"></label>
+    <button class="primario" type="submit">Carregar vetor</button>
+    <button type="button" id="aleatorio">Aleatório como no C</button>
+    <button type="button" id="invertido">Ordem inversa</button>
+    <button type="button" id="repetidos">Valores repetidos</button>
+  </form>
+  <p id="erro" role="alert"></p>
+  <div class="grade">
+    <section class="painel">
+      <div class="cabecalho-painel"><h2>O que acontece no vetor</h2><small id="passada"></small></div>
+      <div class="controles">
+        <button id="reiniciar" title="Voltar ao início">↺ Início</button>
+        <button id="anterior">← Voltar</button>
+        <button id="reproduzir" class="primario">▶ Reproduzir</button>
+        <button id="proximo">Avançar →</button>
+        <label for="velocidade">Ritmo <select id="velocidade"><option value="1800">Devagar</option><option value="1000" selected>Normal</option><option value="400">Rápido</option></select></label>
+      </div>
+      <input id="progresso" type="range" min="0" max="1" value="0" aria-label="Escolher passo da execução">
+      <div class="progresso"><span id="contador"></span><span>← / → para navegar · espaço para reproduzir</span></div>
+      <div id="vetor" class="vetor" aria-label="Valores e índices do vetor"></div>
+      <div class="legenda">
+        <span style="--cor:var(--verde)">Trecho ordenado</span><span style="--cor:var(--amarelo)">Comparação</span>
+        <span style="--cor:var(--azul)">Origem da cópia</span><span style="--cor:var(--roxo)">Destino / chave</span>
+      </div>
+      <div class="variaveis">
+        <div class="variavel"><span>i</span><strong id="valor-i">—</strong></div>
+        <div class="variavel"><span>j</span><strong id="valor-j">—</strong></div>
+        <div class="variavel chave"><span>chave · cópia separada</span><strong id="valor-chave">—</strong></div>
+        <div class="variavel"><span>tam</span><strong id="valor-tam">5</strong></div>
+      </div>
+      <div class="explicacao" aria-live="polite">
+        <h3 id="titulo-passo"></h3><p id="descricao"></p><code id="expressao"></code>
+      </div>
+      <p id="nota-lacuna" class="nota"></p>
+      <div class="metricas"><span>Comparações de valores: <strong id="comparacoes">0</strong></span><span>Deslocamentos: <strong id="deslocamentos">0</strong></span><span>Inserções: <strong id="insercoes">0</strong></span></div>
+    </section>
+    <div class="coluna">
+      <section class="painel">
+        <div class="cabecalho-painel"><h2>Seu código C</h2><small id="linha-atual">exc.c · linhas 48–64</small></div>
+        <p class="suave"><small>A linha verde é a instrução que acabou de executar, ou a condição que acabou de ser avaliada.</small></p>
+        <div id="codigo" class="codigo" aria-label="Código da função insertionSort"></div>
+      </section>
+      <section class="painel">
+        <div class="cabecalho-painel"><h2>Saída de printVtr</h2><small>Clique numa saída para rever o passo</small></div>
+        <div id="saida" class="saida" aria-label="Saídas acumuladas de printVtr"></div>
+        <p class="suave"><small>Seu código imprime o vetor inicial, cada deslocamento após <code>j--</code> e cada inserção. A numeração à esquerda serve apenas para navegar.</small></p>
+      </section>
+    </div>
+  </div>
+  <footer>Material de apoio de AED IV · Professor Thamer Horbylon Nascimento · Ambiente da disciplina: Moodle (AVA), Disciplina.0088. Visualização baseada no código local, sem enunciado oficial anexado. Funciona sem internet.</footer>
+</main>
+<script>
+  'use strict';
+  // Trecho fiel de exc.c; os números exibidos correspondem ao arquivo de origem.
+  const codigoFonte = [
+    'void insertionSort (int *vtr, int tam) {',
+    '    printVtr(vtr, tam);',
+    '',
+    '    for (int i = 1; i < tam; i++) {',
+    '        int chave = vtr[i];',
+    '        int j = i - 1;',
+    '',
+    '        while (j >= 0 && vtr[j] > chave) {',
+    '            vtr[j + 1] = vtr[j];',
+    '            j--;',
+    '            printVtr(vtr, tam); ',
+    '        }',
+    '',
+    '        vtr[j + 1] = chave;',
+    '        printVtr(vtr, tam); ',
+    '    }',
+    '}'
+  ];
+  const elemento = id => document.getElementById(id);
+  let passos = [], posicao = 0, temporizador = null;
+
+  // Cada estado registra os valores DEPOIS da instrução indicada.
+  // As impressões guardam o índice do estado para permitir voltar pelo terminal.
+  function gerarPassos(inicial) {
+    const vtr = [...inicial], tam = vtr.length, estados = [], saidas = [];
+    let i = null, j = null, chave = null, ordenados = 1, lacuna = null;
+    let comparacoes = 0, deslocamentos = 0, insercoes = 0;
+    function registrar(linha, titulo, descricao, expressao = '', detalhes = {}) {
+      estados.push({ linha, titulo, descricao, expressao, vtr:[...vtr], tam, i, j, chave,
+        ordenados, lacuna, comparacoes, deslocamentos, insercoes, saidas:[...saidas], ...detalhes });
+    }
+    function imprimir(linha, descricao) {
+      saidas.push({ valores:[...vtr], passo:estados.length });
+      registrar(linha, 'Imprimir o vetor', descricao, `printVtr → ${vtr.join(' ')}`);
+    }
+    registrar(48, 'Começo da função', 'O vetor chegou à função. O primeiro elemento sozinho já forma um trecho ordenado.', `tam = ${tam}`);
+    imprimir(49, 'Este é o primeiro printVtr, antes de começar o for.');
+    i = 1;
+    registrar(51, 'Inicializar i e testar o for', `Começamos em i = 1, pois vtr[0] já está no trecho ordenado. ${i < tam ? 'Há um elemento para inserir.' : 'O vetor tem apenas um elemento; o laço não executa.'}`, `i = 1; ${i} < ${tam} → ${i < tam ? 'verdadeiro' : 'falso'}`);
+    while (i < tam) {
+      chave = vtr[i];
+      lacuna = i;
+      registrar(52, 'Guardar a chave fora do vetor', `Copiamos vtr[${i}] = ${chave} para chave. Assim, esse valor fica salvo mesmo quando a posição ${i} for sobrescrita.`, `chave = vtr[${i}] = ${chave}`, { destino:i });
+      j = i - 1;
+      registrar(53, 'Olhar o vizinho da esquerda', `j começa em ${j}. Vamos comparar os elementos à esquerda com a chave ${chave}.`, `j = ${i} - 1 = ${j}`);
+      while (true) {
+        const dentro = j >= 0;
+        const maior = dentro && vtr[j] > chave;
+        if (dentro) comparacoes++;
+        const expressao = dentro
+          ? `${j} >= 0 → verdadeiro; vtr[${j}] > chave → ${vtr[j]} > ${chave} → ${maior ? 'verdadeiro' : 'falso'}`
+          : `${j} >= 0 → falso; vtr[j] > chave não é avaliado`;
+        const descricao = !dentro
+          ? 'j chegou a -1: paramos na borda esquerda. O && interrompe a avaliação, então vtr[-1] nunca é acessado.'
+          : maior
+            ? `${vtr[j]} é maior que ${chave}. Vamos copiar esse elemento uma posição para a direita.`
+            : `${vtr[j]} não é maior que ${chave}. O lugar da chave é logo depois dele, no índice ${j + 1}.`;
+        registrar(55, maior ? 'A condição do while é verdadeira' : 'A condição do while é falsa', descricao, expressao, { comparado:dentro ? j : null });
+        if (!maior) break;
+        const origem = j, destino = j + 1, valor = vtr[j];
+        vtr[destino] = valor;
+        deslocamentos++;
+        lacuna = origem;
+        ordenados = origem;
+        registrar(56, 'Deslocar um valor para a direita', `Copiamos ${valor} do índice ${origem} para ${destino}. O vetor mostra ${valor} duas vezes porque esta linha faz uma cópia. A chave ${chave} continua salva.`, `vtr[${destino}] = vtr[${origem}] → ${valor}`, { origem, destino });
+        j--;
+        registrar(57, 'Mover j para a esquerda', `j passa de ${j + 1} para ${j}. A próxima comparação vai olhar ${j < 0 ? 'a borda esquerda' : `vtr[${j}]`}.`, `j-- → j = ${j}`);
+        imprimir(58, 'Seu código imprime depois do deslocamento e do j--. Os valores repetidos temporários também aparecem no terminal.');
+      }
+      const destino = j + 1;
+      vtr[destino] = chave;
+      insercoes++;
+      lacuna = null;
+      ordenados = i + 1;
+      registrar(61, 'Inserir a chave na posição certa', `Escrevemos a chave ${chave} em vtr[${destino}]. Agora os índices 0 até ${i} estão ordenados.`, `vtr[j + 1] = chave → vtr[${destino}] = ${chave}`, { destino });
+      imprimir(62, 'O printVtr mostra o resultado desta inserção. A parte ordenada cresceu um elemento.');
+      const anterior = i;
+      i++;
+      // j e chave pertencem ao corpo do for: deixam de existir entre passadas.
+      j = null;
+      chave = null;
+      registrar(51, 'Incrementar i e testar o for', `i passa de ${anterior} para ${i}. ${i < tam ? 'Vamos buscar a próxima chave.' : 'i chegou a tam; todas as inserções terminaram.'}`, `i++ → ${i}; ${i} < ${tam} → ${i < tam ? 'verdadeiro' : 'falso'}`);
+    }
+    i = null;
+    registrar(64, 'Vetor ordenado!', 'A função terminou. As cópias abriram espaço para cada chave; todas as posições estão em ordem crescente.', vtr.join(' ≤ '));
+    return estados;
+  }
+
+  codigoFonte.forEach((conteudo, indice) => {
+    const linha = document.createElement('div');
+    linha.className = 'linha';
+    linha.dataset.linha = indice + 48;
+    const numero = document.createElement('span');
+    numero.className = 'numero';
+    numero.textContent = indice + 48;
+    const codigo = document.createElement('code');
+    codigo.textContent = conteudo || ' ';
+    linha.append(numero, codigo);
+    elemento('codigo').append(linha);
+  });
+
+  function renderizar() {
+    const estado = passos[posicao];
+    elemento('vetor').replaceChildren();
+    const largura = Math.max(64, ...estado.vtr.map(valor => String(valor).length * 14 + 20));
+    estado.vtr.forEach((valor, indice) => {
+      const celula = document.createElement('div');
+      celula.className = 'celula';
+      celula.style.width = `${largura}px`;
+      if (indice < estado.ordenados) celula.classList.add('ordenado');
+      if (indice === estado.comparado) celula.classList.add('comparado');
+      if (indice === estado.origem) celula.classList.add('origem');
+      if (indice === estado.destino) celula.classList.add('destino');
+      if (indice === estado.lacuna) celula.classList.add('lacuna');
+      const marcadores = document.createElement('div');
+      marcadores.className = 'marcadores';
+      for (const variavel of ['i', 'j']) {
+        if (estado[variavel] === indice) {
+          const marcador = document.createElement('span');
+          marcador.className = `marcador-${variavel}`;
+          marcador.textContent = `${variavel} ↓`;
+          marcadores.append(marcador);
+        }
+      }
+      const numero = document.createElement('div');
+      numero.className = 'valor';
+      numero.textContent = valor;
+      const rotulo = document.createElement('div');
+      rotulo.className = 'indice';
+      rotulo.textContent = `[${indice}]`;
+      celula.setAttribute('aria-label', `vtr[${indice}] = ${valor}${indice === estado.lacuna ? ', espaço para a chave' : ''}`);
+      celula.append(marcadores, numero, rotulo);
+      elemento('vetor').append(celula);
+    });
+    for (const variavel of ['i', 'j', 'chave', 'tam']) elemento(`valor-${variavel}`).textContent = estado[variavel] ?? '—';
+    for (const metrica of ['comparacoes', 'deslocamentos', 'insercoes']) elemento(metrica).textContent = estado[metrica];
+    elemento('titulo-passo').textContent = estado.titulo;
+    elemento('descricao').textContent = estado.descricao;
+    elemento('expressao').textContent = estado.expressao;
+    elemento('nota-lacuna').textContent = estado.lacuna === null
+      ? 'Os índices começam em 0. O verde marca o trecho já ordenado; i marca a passada e j percorre a esquerda.'
+      : `A borda tracejada marca o espaço lógico no índice ${estado.lacuna}. Ele ainda contém ${estado.vtr[estado.lacuna]}; seu código não apaga a posição. A chave ${estado.chave} está salva na variável separada.`;
+    elemento('passada').textContent = posicao === passos.length - 1 ? 'Concluído' : estado.i === null ? 'Preparação' : estado.i < estado.tam ? `Passada ${estado.i} de ${estado.tam - 1}` : 'Encerrando o laço';
+    elemento('linha-atual').textContent = `exc.c · linha ${estado.linha}`;
+    document.querySelectorAll('.linha').forEach(linha => {
+      const ativa = Number(linha.dataset.linha) === estado.linha;
+      linha.classList.toggle('ativa', ativa);
+      if (ativa) linha.setAttribute('aria-current', 'step');
+      else linha.removeAttribute('aria-current');
+    });
+    elemento('contador').textContent = `Passo ${posicao + 1} de ${passos.length}`;
+    elemento('progresso').max = passos.length - 1;
+    elemento('progresso').value = posicao;
+    elemento('anterior').disabled = posicao === 0;
+    elemento('reiniciar').disabled = posicao === 0;
+    elemento('proximo').disabled = posicao === passos.length - 1;
+    elemento('reproduzir').textContent = temporizador !== null ? 'Ⅱ Pausar' : posicao === passos.length - 1 ? '↻ Reproduzir de novo' : '▶ Reproduzir';
+    elemento('saida').replaceChildren();
+    if (!estado.saidas.length) {
+      const vazio = document.createElement('small');
+      vazio.textContent = 'A função ainda não chamou printVtr.';
+      elemento('saida').append(vazio);
+    }
+    estado.saidas.forEach((saida, indice) => {
+      const botao = document.createElement('button');
+      botao.textContent = `${String(indice + 1).padStart(2, '0')} │ ${saida.valores.join(' ')}`;
+      botao.title = `Rever impressão ${indice + 1}, passo ${saida.passo + 1}`;
+      if (saida.passo === posicao) botao.className = 'atual';
+      botao.addEventListener('click', () => irPara(saida.passo));
+      elemento('saida').append(botao);
+    });
+    elemento('saida').scrollTop = elemento('saida').scrollHeight;
+  }
+
+  function pausar() {
+    if (temporizador !== null) clearInterval(temporizador);
+    temporizador = null;
+  }
+  function irPara(destino) {
+    pausar();
+    posicao = Math.max(0, Math.min(passos.length - 1, destino));
+    renderizar();
+  }
+  function reproduzir() {
+    if (temporizador !== null) { pausar(); renderizar(); return; }
+    if (posicao === passos.length - 1) posicao = 0;
+    temporizador = setInterval(() => {
+      posicao++;
+      if (posicao >= passos.length - 1) { posicao = passos.length - 1; pausar(); }
+      renderizar();
+    }, Number(elemento('velocidade').value));
+    renderizar();
+  }
+  function carregar(valores) {
+    pausar();
+    passos = gerarPassos(valores);
+    posicao = 0;
+    elemento('entrada').value = valores.join(', ');
+    elemento('entrada').removeAttribute('aria-invalid');
+    elemento('erro').textContent = '';
+    renderizar();
+  }
+  elemento('formulario').addEventListener('submit', evento => {
+    evento.preventDefault();
+    const texto = elemento('entrada').value.trim();
+    const partes = texto ? texto.split(/[\s,;]+/).filter(Boolean) : [];
+    const valores = partes.map(Number);
+    if (partes.length < 1 || partes.length > 20 || partes.some(parte => !/^[+-]?\d+$/.test(parte)) || valores.some(valor => !Number.isInteger(valor) || valor < -2147483648 || valor > 2147483647)) {
+      elemento('erro').textContent = 'Digite de 1 a 20 inteiros entre -2147483648 e 2147483647, separados por espaço ou vírgula.';
+      elemento('entrada').setAttribute('aria-invalid', 'true');
+      return;
+    }
+    carregar(valores);
+  });
+  elemento('aleatorio').addEventListener('click', () => carregar(Array.from({ length:Math.floor(Math.random() * 11) + 10 }, () => Math.floor(Math.random() * 100) + 1)));
+  elemento('invertido').addEventListener('click', () => carregar([9, 7, 5, 3, 1]));
+  elemento('repetidos').addEventListener('click', () => carregar([5, 2, 5, 2, 3]));
+  elemento('reiniciar').addEventListener('click', () => irPara(0));
+  elemento('anterior').addEventListener('click', () => irPara(posicao - 1));
+  elemento('proximo').addEventListener('click', () => irPara(posicao + 1));
+  elemento('progresso').addEventListener('input', evento => irPara(Number(evento.target.value)));
+  elemento('reproduzir').addEventListener('click', reproduzir);
+  elemento('velocidade').addEventListener('change', () => { if (temporizador !== null) { pausar(); reproduzir(); } });
+  document.addEventListener('keydown', evento => {
+    if (evento.target.closest('input, select, textarea, button, a') || evento.altKey || evento.ctrlKey || evento.metaKey) return;
+    if (evento.key === 'ArrowLeft') { evento.preventDefault(); irPara(posicao - 1); }
+    if (evento.key === 'ArrowRight') { evento.preventDefault(); irPara(posicao + 1); }
+    if (evento.code === 'Space') { evento.preventDefault(); reproduzir(); }
+  });
+  carregar([8, 3, 5, 2, 7]);
+</script>
+</body>
+</html>
